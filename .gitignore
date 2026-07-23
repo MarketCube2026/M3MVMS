@@ -1,0 +1,13 @@
+SM/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+server-runtime.log
+server.err.log
+server.out.log
+.agents/
+.codex/
+.env
+.DS_Store
+Thumbs.db
