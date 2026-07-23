@@ -8,6 +8,8 @@ server.err.log
 server.out.log
 .agents/
 .codex/
+cloud_site/
 .env
 .DS_Store
 Thumbs.db
+install_startup_task.ps1

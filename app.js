@@ -435,7 +435,12 @@ async function loadEvents({ silent = false } = {}) {
     els.lastUpdated.textContent = "正在读取数据";
   }
   try {
-    const response = await fetch(`/api/events?ts=${Date.now()}`);
+    const isGithubPages = window.location.hostname.endsWith("github.io");
+    const primaryUrl = isGithubPages ? `./events.json?ts=${Date.now()}` : `/api/events?ts=${Date.now()}`;
+    let response = await fetch(primaryUrl);
+    if (!response.ok && !isGithubPages) {
+      response = await fetch(`./events.json?ts=${Date.now()}`);
+    }
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const payload = await response.json();
     if (payload.error) throw new Error(payload.error);
@@ -444,7 +449,9 @@ async function loadEvents({ silent = false } = {}) {
     refreshFilterOptions();
     render();
     els.syncStatus.className = "sync-dot ready";
-    els.lastUpdated.textContent = `已同步 ${payload.count} 场 · ${payload.generatedAt}`;
+    els.lastUpdated.textContent = isGithubPages
+      ? `云端快照 ${payload.count} 场 · ${payload.generatedAt}`
+      : `已同步 ${payload.count} 场 · ${payload.generatedAt}`;
   } catch (error) {
     els.syncStatus.className = "sync-dot error";
     els.lastUpdated.textContent = `读取失败：${error.message}`;
