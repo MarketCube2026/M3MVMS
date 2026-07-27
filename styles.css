@@ -92,7 +92,7 @@ h1 {
 
 .toolbar {
   display: grid;
-  grid-template-columns: 190px 132px repeat(4, minmax(120px, 1fr)) minmax(260px, 1.5fr);
+  grid-template-columns: 190px 220px repeat(4, minmax(120px, 1fr)) minmax(260px, 1.5fr);
   gap: 10px;
   align-items: end;
   margin-bottom: 14px;
@@ -159,7 +159,7 @@ input:focus {
 
 .view-switch {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   align-items: center;
   gap: 6px;
 }
@@ -314,6 +314,115 @@ input:focus {
   color: var(--muted);
   font-size: 11px;
   font-style: normal;
+}
+
+.analysis-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.analysis-grid {
+  padding: 14px;
+}
+
+.analysis-overview {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.analysis-metric {
+  min-height: 78px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.analysis-metric span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.analysis-metric strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.analysis-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.analysis-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.analysis-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.analysis-card-head h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.analysis-card-head span {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.bar-list {
+  display: grid;
+  gap: 12px;
+}
+
+.bar-label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.bar-label span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-label strong {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.bar-track {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-soft);
+}
+
+.bar-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #42a5a1);
 }
 
 .all-events-panel {
@@ -789,6 +898,14 @@ td {
 
   .summary-strip {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analysis-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analysis-layout {
+    grid-template-columns: 1fr;
   }
 
   .event-row {

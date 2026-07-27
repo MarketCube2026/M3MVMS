@@ -18,11 +18,14 @@ const els = {
   calendarGrid: document.querySelector("#calendarGrid"),
   yearPanel: document.querySelector("#yearPanel"),
   yearGrid: document.querySelector("#yearGrid"),
+  summaryPanel: document.querySelector("#summaryPanel"),
+  analysisGrid: document.querySelector("#analysisGrid"),
   currentMonth: document.querySelector("#currentMonth"),
   prevMonth: document.querySelector("#prevMonth"),
   nextMonth: document.querySelector("#nextMonth"),
   monthView: document.querySelector("#monthView"),
   yearView: document.querySelector("#yearView"),
+  summaryView: document.querySelector("#summaryView"),
   regionFilter: document.querySelector("#regionFilter"),
   statusFilter: document.querySelector("#statusFilter"),
   typeFilter: document.querySelector("#typeFilter"),
@@ -31,6 +34,7 @@ const els = {
   syncStatus: document.querySelector("#syncStatus"),
   lastUpdated: document.querySelector("#lastUpdated"),
   summaryStrip: document.querySelector("#summaryStrip"),
+  allEventsPanel: document.querySelector(".all-events-panel"),
   allEventsCount: document.querySelector("#allEventsCount"),
   allEventsList: document.querySelector("#allEventsList"),
   detailDrawer: document.querySelector("#detailDrawer"),
@@ -59,6 +63,7 @@ function formatYear(date) {
 }
 
 function formatPeriod(date) {
+  if (state.viewMode === "summary") return `${date.getFullYear()}年会议汇总`;
   return state.viewMode === "year" ? formatYear(date) : formatMonth(date);
 }
 
@@ -145,6 +150,7 @@ function yearEvents(events) {
 }
 
 function visiblePeriodEvents(events) {
+  if (state.viewMode === "summary") return events;
   return state.viewMode === "year" ? yearEvents(events) : monthEvents(events);
 }
 
@@ -170,7 +176,7 @@ function renderSummary(events) {
   const attachments = visible.reduce((sum, event) => sum + event.attachments.length, 0);
   const guests = new Set(visible.flatMap((event) => event.guests || [])).size;
   const active = visible.filter((event) => !event.status.includes("完成")).length;
-  const labelPrefix = state.viewMode === "year" ? "本年" : "本月";
+  const labelPrefix = state.viewMode === "summary" ? "筛选后" : state.viewMode === "year" ? "本年" : "本月";
   const metrics = [
     [`${labelPrefix}会议`, visible.length],
     ["未完成/推进中", active],
@@ -313,20 +319,123 @@ function renderYear(events) {
   });
 }
 
+function countBy(events, getter, fallback = "未填写") {
+  return events.reduce((counts, event) => {
+    const rawValue = getter(event);
+    const value = rawValue && String(rawValue).trim() ? String(rawValue).trim() : fallback;
+    counts.set(value, (counts.get(value) || 0) + 1);
+    return counts;
+  }, new Map());
+}
+
+function sortedCounts(counts) {
+  return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "zh-CN"));
+}
+
+function renderDistribution(title, items, total) {
+  const max = Math.max(1, ...items.map(([, value]) => value));
+  if (!items.length) {
+    return `
+      <section class="analysis-card">
+        <div class="analysis-card-head">
+          <h3>${escapeHtml(title)}</h3>
+          <span>0 项</span>
+        </div>
+        <div class="empty-inline">当前筛选下暂无数据。</div>
+      </section>
+    `;
+  }
+  return `
+    <section class="analysis-card">
+      <div class="analysis-card-head">
+        <h3>${escapeHtml(title)}</h3>
+        <span>${items.length} 项</span>
+      </div>
+      <div class="bar-list">
+        ${items
+          .map(([label, value]) => {
+            const percent = total ? Math.round((value / total) * 100) : 0;
+            const width = Math.max(8, Math.round((value / max) * 100));
+            return `
+              <div class="bar-item">
+                <div class="bar-label">
+                  <span>${escapeHtml(label)}</span>
+                  <strong>${value} 场 · ${percent}%</strong>
+                </div>
+                <div class="bar-track" aria-label="${escapeHtml(label)} ${value} 场">
+                  <span style="width: ${width}%"></span>
+                </div>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderMonthDistribution(events) {
+  const year = state.currentDate.getFullYear();
+  const counts = Array.from({ length: 12 }, (_, month) => {
+    const value = events.filter((event) => {
+      const date = parseDate(event.date);
+      return date && date.getFullYear() === year && date.getMonth() === month;
+    }).length;
+    return [`${month + 1}月`, value];
+  });
+  return renderDistribution(`${year}年时间分布`, counts, counts.reduce((sum, [, value]) => sum + value, 0));
+}
+
+function renderAnalysis(events) {
+  const total = events.length;
+  const complete = events.filter((event) => event.status.includes("完成")).length;
+  const active = total - complete;
+  const owners = countBy(events, (event) => event.owner);
+  const regions = countBy(events, (event) => event.region);
+  const projectTypes = countBy(events, (event) => event.projectType);
+  const projects = countBy(events, (event) => event.projectName || event.projectType);
+  const attachments = events.reduce((sum, event) => sum + event.attachments.length, 0);
+  const guests = new Set(events.flatMap((event) => event.guests || [])).size;
+
+  els.analysisGrid.innerHTML = `
+    <section class="analysis-overview" aria-label="汇总指标">
+      <div class="analysis-metric"><span>会议总数</span><strong>${total}</strong></div>
+      <div class="analysis-metric"><span>推进中/未完成</span><strong>${active}</strong></div>
+      <div class="analysis-metric"><span>已完成</span><strong>${complete}</strong></div>
+      <div class="analysis-metric"><span>相关文件</span><strong>${attachments}</strong></div>
+      <div class="analysis-metric"><span>涉及嘉宾</span><strong>${guests}</strong></div>
+    </section>
+    <section class="analysis-layout">
+      ${renderDistribution("区域分布", sortedCounts(regions), total)}
+      ${renderDistribution("项目分布", sortedCounts(projects), total)}
+      ${renderMonthDistribution(events)}
+      ${renderDistribution("负责人分布", sortedCounts(owners), total)}
+      ${renderDistribution("项目类型分布", sortedCounts(projectTypes), total)}
+    </section>
+  `;
+}
+
 function render() {
   const filtered = getFilteredEvents();
   els.currentMonth.textContent = formatPeriod(state.currentDate);
   els.monthView.classList.toggle("active", state.viewMode === "month");
   els.yearView.classList.toggle("active", state.viewMode === "year");
+  els.summaryView.classList.toggle("active", state.viewMode === "summary");
   els.calendarPanel.hidden = state.viewMode !== "month";
   els.yearPanel.hidden = state.viewMode !== "year";
+  els.summaryPanel.hidden = state.viewMode !== "summary";
+  els.allEventsPanel.hidden = state.viewMode === "summary";
 
   renderSummary(filtered);
-  renderAllEvents(filtered);
-  if (state.viewMode === "year") {
+  if (state.viewMode === "summary") {
+    renderAnalysis(filtered);
+  } else if (state.viewMode === "year") {
     renderYear(filtered);
   } else {
     renderCalendar(filtered);
+  }
+  if (state.viewMode !== "summary") {
+    renderAllEvents(filtered);
   }
 }
 
@@ -641,17 +750,18 @@ function setViewMode(viewMode) {
 
 function bindEvents() {
   els.prevMonth.addEventListener("click", () => {
-    const delta = state.viewMode === "year" ? -12 : -1;
+    const delta = state.viewMode === "month" ? -1 : -12;
     state.currentDate = new Date(state.currentDate.getFullYear(), state.currentDate.getMonth() + delta, 1);
     render();
   });
   els.nextMonth.addEventListener("click", () => {
-    const delta = state.viewMode === "year" ? 12 : 1;
+    const delta = state.viewMode === "month" ? 1 : 12;
     state.currentDate = new Date(state.currentDate.getFullYear(), state.currentDate.getMonth() + delta, 1);
     render();
   });
   els.monthView.addEventListener("click", () => setViewMode("month"));
   els.yearView.addEventListener("click", () => setViewMode("year"));
+  els.summaryView.addEventListener("click", () => setViewMode("summary"));
   [
     [els.regionFilter, "region"],
     [els.statusFilter, "status"],

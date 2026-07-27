@@ -28,6 +28,7 @@
         <div class="view-switch" aria-label="视图切换">
           <button id="monthView" type="button" class="active">月历</button>
           <button id="yearView" type="button">年度</button>
+          <button id="summaryView" type="button">会议汇总</button>
         </div>
         <label>
           <span>区域</span>
@@ -68,6 +69,10 @@
 
       <section id="yearPanel" class="year-panel" aria-label="年度视图" hidden>
         <div id="yearGrid" class="year-grid"></div>
+      </section>
+
+      <section id="summaryPanel" class="analysis-panel" aria-label="会议汇总" hidden>
+        <div id="analysisGrid" class="analysis-grid"></div>
       </section>
 
       <section class="all-events-panel" aria-label="全部会议">
