@@ -1053,7 +1053,8 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
         self.wfile.write(data)
 
 
-handler = MeetingDashboardHandler
+class handler(MeetingDashboardHandler):
+    pass
 
 
 def main() -> None:
