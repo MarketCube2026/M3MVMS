@@ -184,11 +184,7 @@ def is_relevant_attachment(item: Path, category: str) -> bool:
 
 
 def normalize_attachment_category(category: str) -> str:
-    if "课件" in category or "PPT" in category.upper():
-        return "会议课件"
-    if "导入" in category or "附件" in category:
-        return "其他附件"
-    return "其他附件"
+    return "课件/附件"
 
 
 def supported_file_label() -> str:

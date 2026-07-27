@@ -84,7 +84,7 @@ function formatYear(date) {
 }
 
 function formatPeriod(date) {
-  if (state.viewMode === "summary") return `${date.getFullYear()}年会议汇总`;
+  if (state.viewMode === "summary") return `${date.getFullYear()}年汇总`;
   return state.viewMode === "year" ? formatYear(date) : formatMonth(date);
 }
 
@@ -530,7 +530,7 @@ function renderCloudFileList(eventId) {
   return `
     <div class="file-section cloud-file-list" id="cloudFiles">
       <div class="file-group">
-        <h4>云端课件/附件</h4>
+        <h4>课件/附件</h4>
         ${cache.files
           .map(
             (file) => `
@@ -547,12 +547,20 @@ function renderCloudFileList(eventId) {
   `;
 }
 
+function renderAttachmentArea(event) {
+  return `
+    <h3 class="section-title">课件/附件</h3>
+    ${renderFileTools(event)}
+    ${renderFileSections(event.attachments)}
+    ${renderCloudUpload(event.id)}
+  `;
+}
+
 function renderCloudUpload(eventId) {
   if (isCloudSnapshot()) {
     return "";
   }
   return `
-    <h3 class="section-title">上传课件/附件</h3>
     <div class="upload-box">
       <div class="upload-row">
         <input id="cloudUploadInput" type="file" accept="${supportedFileAccept}" />
@@ -560,7 +568,6 @@ function renderCloudUpload(eventId) {
       </div>
       <p class="upload-hint" id="cloudUploadStatus">支持 ${supportedFileLabel}，单个文件不超过 50MB。</p>
     </div>
-    <h3 class="section-title">云端文件</h3>
     ${renderCloudFileList(eventId)}
   `;
 }
@@ -846,10 +853,7 @@ function openDetail(eventId) {
     <div class="info-box">
       <p>${event.folderMatched ? escapeHtml(event.folderName) : "未找到资料文件夹"}</p>
     </div>
-    <h3 class="section-title">相关文件</h3>
-    ${renderFileTools(event)}
-    ${renderFileSections(event.attachments)}
-    ${renderCloudUpload(event.id)}
+    ${renderAttachmentArea(event)}
   `;
   els.detailDrawer.classList.add("open");
   els.detailDrawer.setAttribute("aria-hidden", "false");
