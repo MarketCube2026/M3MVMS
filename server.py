@@ -1053,6 +1053,9 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
         self.wfile.write(data)
 
 
+handler = MeetingDashboardHandler
+
+
 def main() -> None:
     os.chdir(BASE_DIR)
     server = ThreadingHTTPServer((HOST, PORT), MeetingDashboardHandler)
