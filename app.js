@@ -265,7 +265,7 @@ function renderCalendar(events) {
     const key = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
     const dayEvents = byDate.get(key) || [];
     const cell = document.createElement("div");
-    cell.className = `day-cell${day.getMonth() === month ? "" : " outside"}`;
+    cell.className = `day-cell${day.getMonth() === month ? "" : " outside"}${dayEvents.length ? "" : " empty"}`;
     cell.innerHTML = `
       <div class="day-header">
         <span class="day-number">${day.getDate()}</span>
