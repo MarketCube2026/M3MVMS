@@ -135,6 +135,11 @@ def excel_date_to_iso(value: Any) -> str:
     if isinstance(value, (int, float)):
         return from_excel(value).date().isoformat()
     text = str(value).strip()
+    if re.fullmatch(r"\d{4,5}(?:\.0+)?", text):
+        try:
+            return from_excel(float(text)).date().isoformat()
+        except (TypeError, ValueError, OverflowError):
+            pass
     for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y.%m.%d", "%Y%m%d"):
         try:
             return datetime.strptime(text, fmt).date().isoformat()
@@ -690,6 +695,8 @@ def write_event_to_row(worksheet, headers: list[str], row: int, event: dict[str,
     for field, header in EVENT_FIELD_TO_HEADER.items():
         if header not in headers:
             continue
+        if field == "serial" and serial is None and not event.get(field):
+            continue
         col = headers.index(header) + 1
         worksheet.cell(row=row, column=col, value=event.get(field, ""))
     return event["projectId"]
@@ -708,6 +715,32 @@ def add_master_event(payload: dict[str, Any]) -> dict[str, Any]:
     row = worksheet.max_row + 1
     event["projectId"] = project_id or generate_project_id(event, worksheet, headers)
     write_event_to_row(worksheet, headers, row, event, next_serial(worksheet, headers))
+    format_master_sheet(worksheet)
+    save_master_workbook(workbook)
+    workbook.close()
+    return {"projectId": event["projectId"]}
+
+
+def update_master_event(event_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    event = normalize_event_payload(payload)
+    if not event_id:
+        raise RuntimeError("缺少会议 ID")
+    if not event.get("title"):
+        raise RuntimeError("请填写会议名称")
+    workbook = load_master_workbook(data_only=False, read_only=False)
+    worksheet = workbook[workbook.sheetnames[0]]
+    headers = ensure_master_headers(worksheet)
+    row = find_event_row(worksheet, headers, event_id)
+    if row is None:
+        workbook.close()
+        raise RuntimeError("未找到要编辑的会议")
+    target_project_id = event.get("projectId") or event_id
+    existing_row = find_event_row(worksheet, headers, target_project_id)
+    if existing_row is not None and existing_row != row:
+        workbook.close()
+        raise RuntimeError(f"项目编号已存在：{target_project_id}")
+    event["projectId"] = target_project_id
+    write_event_to_row(worksheet, headers, row, event)
     format_master_sheet(worksheet)
     save_master_workbook(workbook)
     workbook.close()
@@ -944,6 +977,14 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
             return
         self.send_error(HTTPStatus.NOT_FOUND, "接口不存在")
 
+    def do_PUT(self) -> None:
+        parsed = urlparse(self.path)
+        if parsed.path == "/api/events":
+            event_id = parse_qs(parsed.query).get("eventId", [""])[0]
+            self.handle_update_event(event_id)
+            return
+        self.send_error(HTTPStatus.NOT_FOUND, "接口不存在")
+
     def do_DELETE(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/api/events":
@@ -966,6 +1007,13 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
     def handle_add_event(self) -> None:
         try:
             result = add_master_event(self.read_json_body())
+            self.send_json({"ok": True, **result})
+        except Exception as exc:
+            self.send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
+
+    def handle_update_event(self, event_id: str) -> None:
+        try:
+            result = update_master_event(event_id, self.read_json_body())
             self.send_json({"ok": True, **result})
         except Exception as exc:
             self.send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)

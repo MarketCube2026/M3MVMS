@@ -684,31 +684,43 @@ function stopCloudFileSync() {
   }
 }
 
-function renderMeetingForm() {
+function fieldFormValue(event, key) {
+  return event ? event[key] || "" : "";
+}
+
+function renderMeetingForm(event = null) {
+  const isEditing = Boolean(event);
   return `
     <header class="detail-head">
       <div class="detail-meta">
         <span class="tag">会议数据</span>
         <span class="tag">Excel同步</span>
       </div>
-      <h2 id="detailTitle">新增会议</h2>
+      <h2 id="detailTitle">${isEditing ? "编辑会议" : "新增会议"}</h2>
       <div class="detail-meta">
-        <span>保存后会写入会议汇总 Excel</span>
+        <span>${isEditing ? "保存后会更新会议汇总 Excel" : "保存后会写入会议汇总 Excel"}</span>
       </div>
     </header>
     <form id="eventForm" class="event-form">
       ${meetingFormFields
         .map(
-          ([key, label, type, placeholder]) => `
+          ([key, label, type, placeholder]) => {
+            const value = fieldFormValue(event, key);
+            return `
             <label class="form-field">
               <span>${escapeHtml(label)}</span>
-              ${key === "progress" || key === "notes" ? `<textarea name="${key}" rows="3" placeholder="${escapeHtml(placeholder)}"></textarea>` : `<input name="${key}" type="${type}" placeholder="${escapeHtml(placeholder)}" />`}
+              ${
+                key === "progress" || key === "notes"
+                  ? `<textarea name="${key}" rows="3" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value)}</textarea>`
+                  : `<input name="${key}" type="${type}" placeholder="${escapeHtml(placeholder)}" value="${escapeHtml(value)}" />`
+              }
             </label>
-          `,
+          `;
+          },
         )
         .join("")}
       <div class="form-actions">
-        <button class="primary-button" type="submit">保存会议</button>
+        <button class="primary-button" type="submit">${isEditing ? "保存修改" : "保存会议"}</button>
         <button class="secondary-button" type="button" id="cancelEventForm">取消</button>
         <span id="eventFormStatus"></span>
       </div>
@@ -716,19 +728,20 @@ function renderMeetingForm() {
   `;
 }
 
-function openEventForm() {
+function openEventForm(event = null) {
   if (isCloudSnapshot()) return;
-  els.detailContent.innerHTML = renderMeetingForm();
+  stopCloudFileSync();
+  els.detailContent.innerHTML = renderMeetingForm(event);
   els.detailDrawer.classList.add("open");
   els.detailDrawer.setAttribute("aria-hidden", "false");
-  bindEventForm();
+  bindEventForm(event?.id || "");
 }
 
 function collectEventForm(form) {
   return Object.fromEntries(meetingFormFields.map(([key]) => [key, form.elements[key]?.value || ""]));
 }
 
-function bindEventForm() {
+function bindEventForm(eventId = "") {
   const form = document.querySelector("#eventForm");
   const cancelButton = document.querySelector("#cancelEventForm");
   const status = document.querySelector("#eventFormStatus");
@@ -743,8 +756,8 @@ function bindEventForm() {
     }
     status.textContent = "正在保存...";
     try {
-      const response = await fetch("/api/events", {
-        method: "POST",
+      const response = await fetch(eventId ? `/api/events?eventId=${encodeURIComponent(eventId)}` : "/api/events", {
+        method: eventId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -826,7 +839,14 @@ function openDetail(eventId) {
         <span>${escapeHtml(event.projectId)}</span>
         <span>${formatDate(event.date)}</span>
       </div>
-      ${isCloudSnapshot() ? "" : `<div class="detail-actions"><button class="danger-button" id="deleteEventButton" type="button">删除会议</button></div>`}
+      ${
+        isCloudSnapshot()
+          ? ""
+          : `<div class="detail-actions">
+              <button class="secondary-button" id="editEventButton" type="button">编辑会议</button>
+              <button class="danger-button" id="deleteEventButton" type="button">删除会议</button>
+            </div>`
+      }
     </header>
     <section class="detail-grid">
       <div class="info-box"><span>会议时间</span><strong>${formatDate(event.date)}</strong></div>
@@ -842,6 +862,7 @@ function openDetail(eventId) {
   `;
   els.detailDrawer.classList.add("open");
   els.detailDrawer.setAttribute("aria-hidden", "false");
+  document.querySelector("#editEventButton")?.addEventListener("click", () => openEventForm(event));
   document.querySelector("#deleteEventButton")?.addEventListener("click", () => deleteEvent(event.id));
   bindUploadControls(event.id);
   bindCloudFileDeleteControls(event.id);
