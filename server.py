@@ -18,7 +18,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils.datetime import from_excel
 
 
@@ -46,7 +47,48 @@ PORT = int(os.environ.get("MEETING_DASHBOARD_PORT", "8765"))
 LOG_FILE = BASE_DIR / "server-runtime.log"
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "meeting-files")
+SUPABASE_MASTER_EXCEL_PATH = os.environ.get("SUPABASE_MASTER_EXCEL_PATH", "data/汇总表-市场部市场活动计划汇总.xlsx")
+MEETING_DATA_SOURCE = os.environ.get("MEETING_DATA_SOURCE", "auto").lower()
+
+MASTER_HEADERS = [
+    "序号",
+    "项目编号",
+    "类型",
+    "项目类型",
+    "项目名称",
+    "区域",
+    "活动/会议名称",
+    "日期",
+    "地理位置",
+    "项目负责人",
+    "参与环节",
+    "讲题/内容",
+    "参与嘉宾",
+    "项目状态",
+    "关键进度/问题",
+    "备注",
+]
+
+EVENT_FIELD_TO_HEADER = {
+    "serial": "序号",
+    "projectId": "项目编号",
+    "type": "类型",
+    "projectType": "项目类型",
+    "projectName": "项目名称",
+    "region": "区域",
+    "title": "活动/会议名称",
+    "date": "日期",
+    "location": "地理位置",
+    "owner": "项目负责人",
+    "participation": "参与环节",
+    "topic": "讲题/内容",
+    "guestText": "参与嘉宾",
+    "status": "项目状态",
+    "progress": "关键进度/问题",
+    "notes": "备注",
+}
 
 LOCAL_RELEVANT_EXTENSIONS = {
     ".doc",
@@ -254,7 +296,7 @@ def extract_local_excel_tables(folder: Path | None) -> list[dict[str, Any]]:
 
 
 def supabase_configured() -> bool:
-    return bool(SUPABASE_URL and SUPABASE_ANON_KEY and SUPABASE_BUCKET)
+    return bool(SUPABASE_URL and (SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY) and SUPABASE_BUCKET)
 
 
 def storage_event_id(value: str) -> str:
@@ -269,9 +311,10 @@ def clean_storage_filename(value: str) -> str:
 
 
 def storage_headers(content_type: str = "application/json") -> dict[str, str]:
+    key = SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY
     return {
-        "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
-        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": f"Bearer {key}",
+        "apikey": key,
         "Content-Type": content_type,
     }
 
@@ -295,6 +338,64 @@ def storage_request(
 
 def storage_object_url(path: str) -> str:
     return f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{quote(path, safe='/')}"
+
+
+def get_storage_object(path: str) -> bytes:
+    _, _, body = storage_request("GET", storage_object_url(path), None, storage_headers("application/octet-stream"))
+    return body
+
+
+def put_storage_object(path: str, data: bytes, content_type: str) -> None:
+    headers = storage_headers(content_type)
+    headers["x-upsert"] = "true"
+    storage_request("POST", storage_object_url(path), data, headers)
+
+
+def use_supabase_master() -> bool:
+    if MEETING_DATA_SOURCE == "supabase":
+        return True
+    if MEETING_DATA_SOURCE == "local":
+        return False
+    return not MASTER_EXCEL.exists() and supabase_configured()
+
+
+def create_empty_master_workbook() -> Workbook:
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "会议汇总"
+    worksheet.append(MASTER_HEADERS)
+    format_master_sheet(worksheet)
+    return workbook
+
+
+def load_master_workbook(data_only: bool = True, read_only: bool = True):
+    if use_supabase_master():
+        if not supabase_configured():
+            raise FileNotFoundError("未找到本地总表，且未配置 Supabase Storage 主数据源")
+        try:
+            data = get_storage_object(SUPABASE_MASTER_EXCEL_PATH)
+            return load_workbook(io.BytesIO(data), data_only=data_only, read_only=read_only)
+        except Exception:
+            if read_only:
+                raise
+            return create_empty_master_workbook()
+    if not MASTER_EXCEL.exists():
+        raise FileNotFoundError(f"未找到总表：{MASTER_EXCEL}")
+    return load_workbook(MASTER_EXCEL, data_only=data_only, read_only=read_only)
+
+
+def save_master_workbook(workbook) -> None:
+    if use_supabase_master():
+        buffer = io.BytesIO()
+        workbook.save(buffer)
+        put_storage_object(
+            SUPABASE_MASTER_EXCEL_PATH,
+            buffer.getvalue(),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        return
+    MASTER_EXCEL.parent.mkdir(parents=True, exist_ok=True)
+    workbook.save(MASTER_EXCEL)
 
 
 def list_cloud_files(event_id: str) -> list[dict[str, Any]]:
@@ -394,14 +495,219 @@ def import_local_file(event_id: str, filename: str, data: bytes) -> dict[str, An
     }
 
 
-def read_master_events() -> dict[str, Any]:
-    if not MASTER_EXCEL.exists():
-        raise FileNotFoundError(f"未找到总表：{MASTER_EXCEL}")
+def worksheet_headers(worksheet) -> list[str]:
+    header_row = next(worksheet.iter_rows(min_row=1, max_row=1, values_only=True), [])
+    return [normalize_header(cell) for cell in header_row]
 
-    workbook = load_workbook(MASTER_EXCEL, data_only=True, read_only=True)
+
+def ensure_master_headers(worksheet) -> list[str]:
+    headers = worksheet_headers(worksheet)
+    if not any(headers):
+        worksheet.append(MASTER_HEADERS)
+        return MASTER_HEADERS[:]
+    for header in MASTER_HEADERS:
+        if header not in headers:
+            worksheet.cell(row=1, column=len(headers) + 1, value=header)
+            headers.append(header)
+    return headers
+
+
+def format_master_sheet(worksheet) -> None:
+    headers = ensure_master_headers(worksheet)
+    header_fill = PatternFill(fill_type="solid", fgColor="EAF2F8")
+    header_font = Font(bold=True, color="17324D")
+    for cell in worksheet[1]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+    widths = {
+        "序号": 8,
+        "项目编号": 16,
+        "类型": 12,
+        "项目类型": 14,
+        "项目名称": 18,
+        "区域": 12,
+        "活动/会议名称": 34,
+        "日期": 14,
+        "地理位置": 28,
+        "项目负责人": 14,
+        "参与环节": 16,
+        "讲题/内容": 22,
+        "参与嘉宾": 24,
+        "项目状态": 14,
+        "关键进度/问题": 30,
+        "备注": 20,
+    }
+    for index, header in enumerate(headers, start=1):
+        worksheet.column_dimensions[worksheet.cell(row=1, column=index).column_letter].width = widths.get(header, 16)
+    worksheet.freeze_panes = "A2"
+    worksheet.auto_filter.ref = worksheet.dimensions
+    for row in worksheet.iter_rows(min_row=2):
+        for cell in row:
+            cell.alignment = Alignment(vertical="top", wrap_text=True)
+
+
+def next_serial(worksheet, headers: list[str]) -> int:
+    if "序号" not in headers:
+        return max(1, worksheet.max_row)
+    serial_col = headers.index("序号") + 1
+    values = []
+    for row in range(2, worksheet.max_row + 1):
+        value = worksheet.cell(row=row, column=serial_col).value
+        try:
+            values.append(int(value))
+        except (TypeError, ValueError):
+            continue
+    return (max(values) + 1) if values else 1
+
+
+def find_event_row(worksheet, headers: list[str], event_id: str) -> int | None:
+    if "项目编号" not in headers:
+        return None
+    project_col = headers.index("项目编号") + 1
+    for row in range(2, worksheet.max_row + 1):
+        if clean_value(worksheet.cell(row=row, column=project_col).value) == event_id:
+            return row
+    return None
+
+
+def generate_project_id(event: dict[str, Any], worksheet, headers: list[str]) -> str:
+    event_date = clean_value(event.get("date")) or datetime.now().date().isoformat()
+    key = date_key(excel_date_to_iso(event_date)) or datetime.now().strftime("%Y%m%d")
+    base = f"GE{key}"
+    existing = set()
+    if "项目编号" in headers:
+        project_col = headers.index("项目编号") + 1
+        existing = {clean_value(worksheet.cell(row=row, column=project_col).value) for row in range(2, worksheet.max_row + 1)}
+    index = 1
+    candidate = f"{base}{index:02d}"
+    while candidate in existing:
+        index += 1
+        candidate = f"{base}{index:02d}"
+    return candidate
+
+
+def normalize_event_payload(payload: dict[str, Any]) -> dict[str, str]:
+    normalized = {key: clean_value(payload.get(key)) for key in EVENT_FIELD_TO_HEADER}
+    normalized["projectId"] = normalized.get("projectId") or clean_value(payload.get("id"))
+    normalized["title"] = normalized.get("title") or clean_value(payload.get("活动/会议名称"))
+    normalized["date"] = excel_date_to_iso(normalized.get("date") or payload.get("日期"))
+    normalized["guestText"] = normalized.get("guestText") or clean_value(payload.get("guests"))
+    return normalized
+
+
+def write_event_to_row(worksheet, headers: list[str], row: int, event: dict[str, str], serial: int | None = None) -> str:
+    if not event.get("projectId"):
+        event["projectId"] = generate_project_id(event, worksheet, headers)
+    if serial is not None:
+        event["serial"] = str(serial)
+    for field, header in EVENT_FIELD_TO_HEADER.items():
+        if header not in headers:
+            continue
+        col = headers.index(header) + 1
+        worksheet.cell(row=row, column=col, value=event.get(field, ""))
+    return event["projectId"]
+
+
+def add_master_event(payload: dict[str, Any]) -> dict[str, Any]:
+    event = normalize_event_payload(payload)
+    if not event.get("title"):
+        raise RuntimeError("请填写会议名称")
+    workbook = load_master_workbook(data_only=False, read_only=False)
     worksheet = workbook[workbook.sheetnames[0]]
-    header_row = next(worksheet.iter_rows(min_row=1, max_row=1, values_only=True))
-    headers = [normalize_header(cell) for cell in header_row]
+    headers = ensure_master_headers(worksheet)
+    project_id = event.get("projectId")
+    if project_id and find_event_row(worksheet, headers, project_id):
+        raise RuntimeError(f"项目编号已存在：{project_id}")
+    row = worksheet.max_row + 1
+    event["projectId"] = project_id or generate_project_id(event, worksheet, headers)
+    write_event_to_row(worksheet, headers, row, event, next_serial(worksheet, headers))
+    format_master_sheet(worksheet)
+    save_master_workbook(workbook)
+    workbook.close()
+    return {"projectId": event["projectId"]}
+
+
+def delete_master_event(event_id: str) -> None:
+    workbook = load_master_workbook(data_only=False, read_only=False)
+    worksheet = workbook[workbook.sheetnames[0]]
+    headers = ensure_master_headers(worksheet)
+    row = find_event_row(worksheet, headers, event_id)
+    if row is None:
+        workbook.close()
+        raise RuntimeError("未找到要删除的会议")
+    worksheet.delete_rows(row, 1)
+    format_master_sheet(worksheet)
+    save_master_workbook(workbook)
+    workbook.close()
+
+
+def export_events_workbook() -> bytes:
+    payload = read_master_events()
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "会议汇总"
+    worksheet.append(MASTER_HEADERS)
+    for index, event in enumerate(payload.get("events", []), start=1):
+        row_values = []
+        for header in MASTER_HEADERS:
+            field = next((field for field, mapped in EVENT_FIELD_TO_HEADER.items() if mapped == header), "")
+            row_values.append(index if header == "序号" else event.get(field, ""))
+        worksheet.append(row_values)
+    format_master_sheet(worksheet)
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+    workbook.close()
+    return buffer.getvalue()
+
+
+def import_events_workbook(data: bytes) -> dict[str, int]:
+    workbook = load_workbook(io.BytesIO(data), data_only=True, read_only=True)
+    source = workbook[workbook.sheetnames[0]]
+    source_headers = worksheet_headers(source)
+    if not any(header in source_headers for header in ("项目编号", "活动/会议名称", "日期")):
+        workbook.close()
+        raise RuntimeError("导入文件缺少标准表头，请先导出模板后填写")
+
+    master = load_master_workbook(data_only=False, read_only=False)
+    worksheet = master[master.sheetnames[0]]
+    headers = ensure_master_headers(worksheet)
+    created = 0
+    updated = 0
+    skipped = 0
+
+    for source_row in source.iter_rows(min_row=2, values_only=True):
+        values = {source_headers[index]: source_row[index] if index < len(source_headers) else None for index in range(len(source_headers))}
+        if not any(clean_value(value) for value in values.values()):
+            continue
+        payload = {}
+        for field, header in EVENT_FIELD_TO_HEADER.items():
+            payload[field] = values.get(header)
+        event = normalize_event_payload(payload)
+        if not event.get("title") and not event.get("date"):
+            skipped += 1
+            continue
+        row = find_event_row(worksheet, headers, event.get("projectId", "")) if event.get("projectId") else None
+        if row:
+            write_event_to_row(worksheet, headers, row, event)
+            updated += 1
+        else:
+            row = worksheet.max_row + 1
+            if not event.get("projectId"):
+                event["projectId"] = generate_project_id(event, worksheet, headers)
+            write_event_to_row(worksheet, headers, row, event, next_serial(worksheet, headers))
+            created += 1
+    workbook.close()
+    format_master_sheet(worksheet)
+    save_master_workbook(master)
+    master.close()
+    return {"created": created, "updated": updated, "skipped": skipped}
+
+
+def read_master_events() -> dict[str, Any]:
+    workbook = load_master_workbook(data_only=True, read_only=True)
+    worksheet = workbook[workbook.sheetnames[0]]
+    headers = worksheet_headers(worksheet)
     folders = scan_folders()
     events: list[dict[str, Any]] = []
 
@@ -450,12 +756,13 @@ def read_master_events() -> dict[str, Any]:
 
     workbook.close()
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    mtimes = [MASTER_EXCEL.stat().st_mtime, *(folder_mtime(folder) for folder in folders)]
+    local_source_mtime = MASTER_EXCEL.stat().st_mtime if MASTER_EXCEL.exists() else datetime.now().timestamp()
+    mtimes = [local_source_mtime, *(folder_mtime(folder) for folder in folders)]
     latest_mtime = max(mtimes)
     return {
         "generatedAt": generated_at,
-        "sourceFile": MASTER_EXCEL.name,
-        "sourceModifiedAt": datetime.fromtimestamp(MASTER_EXCEL.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S"),
+        "sourceFile": MASTER_EXCEL.name if not use_supabase_master() else SUPABASE_MASTER_EXCEL_PATH,
+        "sourceModifiedAt": datetime.fromtimestamp(local_source_mtime).strftime("%Y-%m-%d %H:%M:%S"),
         "dataVersion": latest_mtime,
         "count": len(events),
         "events": events,
@@ -478,6 +785,13 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def read_json_body(self) -> dict[str, Any]:
+        length = int(self.headers.get("Content-Length", "0") or 0)
+        if length <= 0:
+            return {}
+        data = self.rfile.read(length)
+        return json.loads(data.decode("utf-8") or "{}")
+
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/api/events":
@@ -495,6 +809,9 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
             event_id = parse_qs(parsed.query).get("eventId", [""])[0]
             self.serve_export_files(event_id)
             return
+        if parsed.path == "/api/export-events":
+            self.serve_export_events()
+            return
         if parsed.path.startswith("/files/"):
             self.serve_sm_file(parsed.path.removeprefix("/files/"))
             return
@@ -504,6 +821,9 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
+        if parsed.path == "/api/events":
+            self.handle_add_event()
+            return
         if parsed.path == "/api/upload":
             event_id = parse_qs(parsed.query).get("eventId", [""])[0]
             self.handle_upload(event_id)
@@ -511,6 +831,17 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/import-file":
             event_id = parse_qs(parsed.query).get("eventId", [""])[0]
             self.handle_import_file(event_id)
+            return
+        if parsed.path == "/api/import-events":
+            self.handle_import_events()
+            return
+        self.send_error(HTTPStatus.NOT_FOUND, "接口不存在")
+
+    def do_DELETE(self) -> None:
+        parsed = urlparse(self.path)
+        if parsed.path == "/api/events":
+            event_id = parse_qs(parsed.query).get("eventId", [""])[0]
+            self.handle_delete_event(event_id)
             return
         self.send_error(HTTPStatus.NOT_FOUND, "接口不存在")
 
@@ -520,6 +851,23 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
             self.send_json(payload)
         except Exception as exc:
             self.send_json({"error": str(exc)}, HTTPStatus.INTERNAL_SERVER_ERROR)
+
+    def handle_add_event(self) -> None:
+        try:
+            result = add_master_event(self.read_json_body())
+            self.send_json({"ok": True, **result})
+        except Exception as exc:
+            self.send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
+
+    def handle_delete_event(self, event_id: str) -> None:
+        if not event_id:
+            self.send_json({"error": "缺少会议 ID"}, HTTPStatus.BAD_REQUEST)
+            return
+        try:
+            delete_master_event(event_id)
+            self.send_json({"ok": True})
+        except Exception as exc:
+            self.send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
 
     def serve_cloud_files(self, event_id: str) -> None:
         if not event_id:
@@ -607,6 +955,46 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
             self.send_json({"ok": True, "file": imported})
         except Exception as exc:
             self.send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
+
+    def handle_import_events(self) -> None:
+        form = cgi.FieldStorage(
+            fp=self.rfile,
+            headers=self.headers,
+            environ={
+                "REQUEST_METHOD": "POST",
+                "CONTENT_TYPE": self.headers.get("Content-Type", ""),
+            },
+        )
+        file_item = form["file"] if "file" in form else None
+        if file_item is None or not getattr(file_item, "filename", ""):
+            self.send_json({"error": "请选择要导入的会议 Excel"}, HTTPStatus.BAD_REQUEST)
+            return
+        if Path(file_item.filename).suffix.lower() not in {".xlsx", ".xlsm"}:
+            self.send_json({"error": "仅支持导入 .xlsx / .xlsm 会议表"}, HTTPStatus.BAD_REQUEST)
+            return
+        data = file_item.file.read()
+        if len(data) > 20 * 1024 * 1024:
+            self.send_json({"error": "会议 Excel 不能超过 20MB"}, HTTPStatus.BAD_REQUEST)
+            return
+        try:
+            result = import_events_workbook(data)
+            self.send_json({"ok": True, **result})
+        except Exception as exc:
+            self.send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
+
+    def serve_export_events(self) -> None:
+        try:
+            data = export_events_workbook()
+        except Exception as exc:
+            self.send_error(HTTPStatus.INTERNAL_SERVER_ERROR, str(exc))
+            return
+        filename = f"会议汇总导出-{datetime.now().strftime('%Y%m%d')}.xlsx"
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Content-Disposition", f"attachment; filename*=UTF-8''{quote(filename)}")
+        self.end_headers()
+        self.wfile.write(data)
 
     def serve_export_files(self, event_id: str) -> None:
         if not event_id:

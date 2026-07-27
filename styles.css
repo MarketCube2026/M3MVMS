@@ -443,6 +443,15 @@ input:focus {
   background: #f4f7fb;
 }
 
+.panel-actions,
+.detail-actions,
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
 .panel-heading h2 {
   margin: 0;
   font-size: 17px;
@@ -835,6 +844,64 @@ input:focus {
   opacity: 0.55;
 }
 
+.danger-button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #f1b8b8;
+  border-radius: 6px;
+  background: #fff5f5;
+  color: #b42318;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.event-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.form-field {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.form-field span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.form-field textarea {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--surface-soft);
+  color: var(--text);
+  padding: 8px 9px;
+  outline: none;
+}
+
+.form-field textarea:focus {
+  border-color: var(--accent);
+  background: #fff;
+}
+
+.form-actions {
+  grid-column: 1 / -1;
+  padding-top: 4px;
+}
+
+.form-actions span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .upload-hint {
   margin: 8px 0 0;
   color: var(--muted);
@@ -909,6 +976,15 @@ td {
   }
 
   .event-row {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .event-form {
     grid-template-columns: 1fr;
   }
 

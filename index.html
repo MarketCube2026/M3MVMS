@@ -78,6 +78,12 @@
       <section class="all-events-panel" aria-label="全部会议">
         <div class="panel-heading">
           <h2>全部会议</h2>
+          <div class="panel-actions" id="eventDataTools">
+            <button id="addEventButton" type="button" class="secondary-button">新增会议</button>
+            <input id="eventImportInput" type="file" accept=".xlsx,.xlsm" hidden />
+            <button id="eventImportButton" type="button" class="secondary-button">导入会议Excel</button>
+            <a id="eventExportButton" class="secondary-button" href="/api/export-events" target="_blank" rel="noreferrer">导出会议Excel</a>
+          </div>
           <span id="allEventsCount"></span>
         </div>
         <div id="allEventsList" class="all-events-list"></div>

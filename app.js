@@ -37,6 +37,11 @@ const els = {
   allEventsPanel: document.querySelector(".all-events-panel"),
   allEventsCount: document.querySelector("#allEventsCount"),
   allEventsList: document.querySelector("#allEventsList"),
+  eventDataTools: document.querySelector("#eventDataTools"),
+  addEventButton: document.querySelector("#addEventButton"),
+  eventImportInput: document.querySelector("#eventImportInput"),
+  eventImportButton: document.querySelector("#eventImportButton"),
+  eventExportButton: document.querySelector("#eventExportButton"),
   detailDrawer: document.querySelector("#detailDrawer"),
   detailContent: document.querySelector("#detailContent"),
   closeDrawer: document.querySelector("#closeDrawer"),
@@ -47,6 +52,22 @@ const els = {
 const supportedFileAccept = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png";
 const supportedFileExtensions = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "jpg", "jpeg", "png"];
 const supportedFileLabel = "PDF、Word、PPT、Excel、JPG、PNG";
+const meetingFormFields = [
+  ["projectId", "项目编号", "text", "留空将自动生成"],
+  ["title", "活动/会议名称", "text", "必填"],
+  ["date", "日期", "date", ""],
+  ["region", "区域", "text", ""],
+  ["location", "地理位置", "text", ""],
+  ["owner", "项目负责人", "text", ""],
+  ["projectType", "项目类型", "text", ""],
+  ["projectName", "项目名称", "text", ""],
+  ["status", "项目状态", "text", "进行中 / 已完成"],
+  ["participation", "我司参与环节", "text", ""],
+  ["guestText", "参与嘉宾", "text", ""],
+  ["topic", "讲题/内容", "text", ""],
+  ["progress", "关键进度/问题", "text", ""],
+  ["notes", "备注", "text", ""],
+];
 
 function parseDate(value) {
   if (!value) return null;
@@ -641,6 +662,133 @@ function bindLocalFileControls(eventId) {
   });
 }
 
+function renderMeetingForm() {
+  return `
+    <header class="detail-head">
+      <div class="detail-meta">
+        <span class="tag">会议数据</span>
+        <span class="tag">Excel同步</span>
+      </div>
+      <h2 id="detailTitle">新增会议</h2>
+      <div class="detail-meta">
+        <span>保存后会写入会议汇总 Excel</span>
+      </div>
+    </header>
+    <form id="eventForm" class="event-form">
+      ${meetingFormFields
+        .map(
+          ([key, label, type, placeholder]) => `
+            <label class="form-field">
+              <span>${escapeHtml(label)}</span>
+              ${key === "progress" || key === "notes" ? `<textarea name="${key}" rows="3" placeholder="${escapeHtml(placeholder)}"></textarea>` : `<input name="${key}" type="${type}" placeholder="${escapeHtml(placeholder)}" />`}
+            </label>
+          `,
+        )
+        .join("")}
+      <div class="form-actions">
+        <button class="primary-button" type="submit">保存会议</button>
+        <button class="secondary-button" type="button" id="cancelEventForm">取消</button>
+        <span id="eventFormStatus"></span>
+      </div>
+    </form>
+  `;
+}
+
+function openEventForm() {
+  if (isCloudSnapshot()) return;
+  els.detailContent.innerHTML = renderMeetingForm();
+  els.detailDrawer.classList.add("open");
+  els.detailDrawer.setAttribute("aria-hidden", "false");
+  bindEventForm();
+}
+
+function collectEventForm(form) {
+  return Object.fromEntries(meetingFormFields.map(([key]) => [key, form.elements[key]?.value || ""]));
+}
+
+function bindEventForm() {
+  const form = document.querySelector("#eventForm");
+  const cancelButton = document.querySelector("#cancelEventForm");
+  const status = document.querySelector("#eventFormStatus");
+  if (!form || !status) return;
+  cancelButton?.addEventListener("click", closeDetail);
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const payload = collectEventForm(form);
+    if (!payload.title.trim()) {
+      status.textContent = "请填写活动/会议名称。";
+      return;
+    }
+    status.textContent = "正在保存...";
+    try {
+      const response = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      if (!response.ok || result.error) throw new Error(result.error || `HTTP ${response.status}`);
+      status.textContent = "保存完成。";
+      await loadEvents({ silent: true });
+      closeDetail();
+    } catch (error) {
+      status.textContent = `保存失败：${error.message}`;
+    }
+  });
+}
+
+async function deleteEvent(eventId) {
+  if (!eventId || !window.confirm("确认删除这场会议吗？该操作会从会议汇总 Excel 中移除该行。")) return;
+  try {
+    const response = await fetch(`/api/events?eventId=${encodeURIComponent(eventId)}`, { method: "DELETE" });
+    const payload = await response.json();
+    if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
+    await loadEvents({ silent: true });
+    closeDetail();
+  } catch (error) {
+    window.alert(`删除失败：${error.message}`);
+  }
+}
+
+function bindEventDataTools() {
+  if (isCloudSnapshot()) {
+    if (els.eventDataTools) els.eventDataTools.hidden = true;
+    return;
+  }
+  els.addEventButton?.addEventListener("click", openEventForm);
+  els.eventImportButton?.addEventListener("click", () => els.eventImportInput?.click());
+  els.eventImportInput?.addEventListener("change", async () => {
+    const file = els.eventImportInput.files && els.eventImportInput.files[0];
+    if (!file) return;
+    const extension = file.name.split(".").pop().toLowerCase();
+    if (!["xlsx", "xlsm"].includes(extension)) {
+      window.alert("请导入 .xlsx / .xlsm 格式的会议 Excel。");
+      els.eventImportInput.value = "";
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    els.eventImportButton.disabled = true;
+    els.eventImportButton.textContent = "导入中...";
+    try {
+      const response = await fetch("/api/import-events", {
+        method: "POST",
+        body: formData,
+      });
+      const payload = await response.json();
+      if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
+      await loadEvents({ silent: true });
+      window.alert(`导入完成：新增 ${payload.created} 条，更新 ${payload.updated} 条，跳过 ${payload.skipped} 条。`);
+    } catch (error) {
+      window.alert(`导入失败：${error.message}`);
+    } finally {
+      els.eventImportInput.value = "";
+      els.eventImportButton.disabled = false;
+      els.eventImportButton.textContent = "导入会议Excel";
+    }
+  });
+}
+
 function renderLocalTables(tables) {
   if (!tables.length) return "";
   return `
@@ -682,6 +830,7 @@ function openDetail(eventId) {
         <span>${escapeHtml(event.projectId)}</span>
         <span>${formatDate(event.date)}</span>
       </div>
+      ${isCloudSnapshot() ? "" : `<div class="detail-actions"><button class="danger-button" id="deleteEventButton" type="button">删除会议</button></div>`}
     </header>
     <section class="detail-grid">
       <div class="info-box"><span>会议时间</span><strong>${formatDate(event.date)}</strong></div>
@@ -704,6 +853,7 @@ function openDetail(eventId) {
   `;
   els.detailDrawer.classList.add("open");
   els.detailDrawer.setAttribute("aria-hidden", "false");
+  document.querySelector("#deleteEventButton")?.addEventListener("click", () => deleteEvent(event.id));
   bindLocalFileControls(event.id);
   bindUploadControls(event.id);
   loadCloudFiles(event.id);
@@ -782,6 +932,7 @@ function bindEvents() {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeDetail();
   });
+  bindEventDataTools();
 }
 
 bindEvents();
