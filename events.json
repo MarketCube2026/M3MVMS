@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-27 10:48:47",
+  "generatedAt": "2026-07-27 11:01:24",
   "sourceFile": "汇总表-市场部市场活动计划汇总.xlsx",
   "sourceModifiedAt": "2026-07-14 14:26:06",
   "dataVersion": 1784546569.3412256,
@@ -49,6 +49,15 @@
           "extension": ".pptx",
           "size": 4494968,
           "modifiedAt": "2026-01-30 14:16"
+        },
+        {
+          "name": "初步日程.jpg",
+          "category": "其他附件",
+          "relativePath": "20260203 东一区-药企合作少见靶点学院（南京）/日程/初步日程.jpg",
+          "url": "/files/20260203%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E8%8D%AF%E4%BC%81%E5%90%88%E4%BD%9C%E5%B0%91%E8%A7%81%E9%9D%B6%E7%82%B9%E5%AD%A6%E9%99%A2%EF%BC%88%E5%8D%97%E4%BA%AC%EF%BC%89/%E6%97%A5%E7%A8%8B/%E5%88%9D%E6%AD%A5%E6%97%A5%E7%A8%8B.jpg",
+          "extension": ".jpg",
+          "size": 384825,
+          "modifiedAt": "2026-01-14 16:18"
         }
       ],
       "localTables": []
@@ -142,6 +151,33 @@
           "extension": ".pptx",
           "size": 7744724,
           "modifiedAt": "2026-03-09 15:33"
+        },
+        {
+          "name": "2026.03.14 东一区-胰腺癌会议信息表（总部）.xlsx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/2026.03.14 东一区-胰腺癌会议信息表（总部）.xlsx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/2026.03.14%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E8%83%B0%E8%85%BA%E7%99%8C%E4%BC%9A%E8%AE%AE%E4%BF%A1%E6%81%AF%E8%A1%A8%EF%BC%88%E6%80%BB%E9%83%A8%EF%BC%89.xlsx",
+          "extension": ".xlsx",
+          "size": 43385,
+          "modifiedAt": "2026-03-27 15:54"
+        },
+        {
+          "name": "20260314-金陵论见-日程A4 031401.jpg",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/日程/20260314-金陵论见-日程A4 031401.jpg",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E6%97%A5%E7%A8%8B/20260314-%E9%87%91%E9%99%B5%E8%AE%BA%E8%A7%81-%E6%97%A5%E7%A8%8BA4%20031401.jpg",
+          "extension": ".jpg",
+          "size": 809088,
+          "modifiedAt": "2026-03-09 15:37"
+        },
+        {
+          "name": "20260314-金陵论见-最新日程（更新）.jpg",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/日程/20260314-金陵论见-最新日程（更新）.jpg",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E6%97%A5%E7%A8%8B/20260314-%E9%87%91%E9%99%B5%E8%AE%BA%E8%A7%81-%E6%9C%80%E6%96%B0%E6%97%A5%E7%A8%8B%EF%BC%88%E6%9B%B4%E6%96%B0%EF%BC%89.jpg",
+          "extension": ".jpg",
+          "size": 806153,
+          "modifiedAt": "2026-03-09 15:28"
         },
         {
           "name": "3.陆子鹏简介_20260309(1).pptx",
@@ -462,6 +498,15 @@
           "extension": ".pptx",
           "size": 28984267,
           "modifiedAt": "2026-03-20 08:47"
+        },
+        {
+          "name": "日程.png",
+          "category": "其他附件",
+          "relativePath": "20260320 总部-CMAC年会强生专场/日程.png",
+          "url": "/files/20260320%20%E6%80%BB%E9%83%A8-CMAC%E5%B9%B4%E4%BC%9A%E5%BC%BA%E7%94%9F%E4%B8%93%E5%9C%BA/%E6%97%A5%E7%A8%8B.png",
+          "extension": ".png",
+          "size": 172723,
+          "modifiedAt": "2026-07-14 11:08"
         }
       ],
       "localTables": []
@@ -510,6 +555,15 @@
           "extension": ".pptx",
           "size": 3087011,
           "modifiedAt": "2026-05-12 17:27"
+        },
+        {
+          "name": "日程A4.jpg",
+          "category": "其他附件",
+          "relativePath": "20260513 总部-DIA中国年会/日程A4.jpg",
+          "url": "/files/20260513%20%E6%80%BB%E9%83%A8-DIA%E4%B8%AD%E5%9B%BD%E5%B9%B4%E4%BC%9A/%E6%97%A5%E7%A8%8BA4.jpg",
+          "extension": ".jpg",
+          "size": 2920413,
+          "modifiedAt": "2026-05-09 09:43"
         }
       ],
       "localTables": []
@@ -560,6 +614,15 @@
           "modifiedAt": "2026-03-25 16:35"
         },
         {
+          "name": "KV.png",
+          "category": "会议课件",
+          "relativePath": "20260328 东二区-乳腺癌精准诊疗会议/会议课件/KV.png",
+          "url": "/files/20260328%20%E4%B8%9C%E4%BA%8C%E5%8C%BA-%E4%B9%B3%E8%85%BA%E7%99%8C%E7%B2%BE%E5%87%86%E8%AF%8A%E7%96%97%E4%BC%9A%E8%AE%AE/%E4%BC%9A%E8%AE%AE%E8%AF%BE%E4%BB%B6/KV.png",
+          "extension": ".png",
+          "size": 4144369,
+          "modifiedAt": "2026-03-27 14:46"
+        },
+        {
           "name": "串场PPT— 20260328金陵论见-乳腺癌精准诊疗学术交流会.pdf",
           "category": "会议课件",
           "relativePath": "20260328 东二区-乳腺癌精准诊疗会议/会议课件/串场PPT— 20260328金陵论见-乳腺癌精准诊疗学术交流会.pdf",
@@ -603,6 +666,24 @@
           "extension": ".pptx",
           "size": 17875098,
           "modifiedAt": "2026-03-26 11:03"
+        },
+        {
+          "name": "2026.03.28 东一区-乳腺癌会议信息表.xlsx",
+          "category": "其他附件",
+          "relativePath": "20260328 东二区-乳腺癌精准诊疗会议/2026.03.28 东一区-乳腺癌会议信息表.xlsx",
+          "url": "/files/20260328%20%E4%B8%9C%E4%BA%8C%E5%8C%BA-%E4%B9%B3%E8%85%BA%E7%99%8C%E7%B2%BE%E5%87%86%E8%AF%8A%E7%96%97%E4%BC%9A%E8%AE%AE/2026.03.28%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E4%B9%B3%E8%85%BA%E7%99%8C%E4%BC%9A%E8%AE%AE%E4%BF%A1%E6%81%AF%E8%A1%A8.xlsx",
+          "extension": ".xlsx",
+          "size": 34185,
+          "modifiedAt": "2026-03-27 15:54"
+        },
+        {
+          "name": "20260328-金陵论见-乳腺癌.jpg",
+          "category": "其他附件",
+          "relativePath": "20260328 东二区-乳腺癌精准诊疗会议/20260328-金陵论见-乳腺癌.jpg",
+          "url": "/files/20260328%20%E4%B8%9C%E4%BA%8C%E5%8C%BA-%E4%B9%B3%E8%85%BA%E7%99%8C%E7%B2%BE%E5%87%86%E8%AF%8A%E7%96%97%E4%BC%9A%E8%AE%AE/20260328-%E9%87%91%E9%99%B5%E8%AE%BA%E8%A7%81-%E4%B9%B3%E8%85%BA%E7%99%8C.jpg",
+          "extension": ".jpg",
+          "size": 654997,
+          "modifiedAt": "2026-03-18 17:40"
         }
       ],
       "localTables": [
@@ -952,6 +1033,24 @@
           "modifiedAt": "2026-06-30 09:43"
         },
         {
+          "name": "【学术会议】2026.08.01 CTONG年会会议信息表.xlsx",
+          "category": "其他附件",
+          "relativePath": "20260801 总部-CTONG年会/【学术会议】2026.08.01 CTONG年会会议信息表.xlsx",
+          "url": "/files/20260801%20%E6%80%BB%E9%83%A8-CTONG%E5%B9%B4%E4%BC%9A/%E3%80%90%E5%AD%A6%E6%9C%AF%E4%BC%9A%E8%AE%AE%E3%80%912026.08.01%20CTONG%E5%B9%B4%E4%BC%9A%E4%BC%9A%E8%AE%AE%E4%BF%A1%E6%81%AF%E8%A1%A8.xlsx",
+          "extension": ".xlsx",
+          "size": 293754,
+          "modifiedAt": "2026-07-07 14:50"
+        },
+        {
+          "name": "会议信息表：CTONG 参会日程（广州） 2025.xlsx",
+          "category": "其他附件",
+          "relativePath": "20260801 总部-CTONG年会/会议信息表：CTONG 参会日程（广州） 2025.xlsx",
+          "url": "/files/20260801%20%E6%80%BB%E9%83%A8-CTONG%E5%B9%B4%E4%BC%9A/%E4%BC%9A%E8%AE%AE%E4%BF%A1%E6%81%AF%E8%A1%A8%EF%BC%9ACTONG%20%E5%8F%82%E4%BC%9A%E6%97%A5%E7%A8%8B%EF%BC%88%E5%B9%BF%E5%B7%9E%EF%BC%89%202025.xlsx",
+          "extension": ".xlsx",
+          "size": 537177,
+          "modifiedAt": "2026-05-12 17:53"
+        },
+        {
           "name": "参会资讯（2026 CTONG年会）.pdf",
           "category": "其他附件",
           "relativePath": "20260801 总部-CTONG年会/参会资讯（2026 CTONG年会）.pdf",
@@ -1170,6 +1269,15 @@
           "extension": ".pptx",
           "size": 4709579,
           "modifiedAt": "2026-03-26 10:09"
+        },
+        {
+          "name": "03-日程.jpg",
+          "category": "其他附件",
+          "relativePath": "20260715 总部-医学信息专员培训/日程/03-日程.jpg",
+          "url": "/files/20260715%20%E6%80%BB%E9%83%A8-%E5%8C%BB%E5%AD%A6%E4%BF%A1%E6%81%AF%E4%B8%93%E5%91%98%E5%9F%B9%E8%AE%AD/%E6%97%A5%E7%A8%8B/03-%E6%97%A5%E7%A8%8B.jpg",
+          "extension": ".jpg",
+          "size": 1677791,
+          "modifiedAt": "2026-03-26 10:55"
         }
       ],
       "localTables": []

@@ -40,6 +40,10 @@ const els = {
   emptyStateTemplate: document.querySelector("#emptyStateTemplate"),
 };
 
+const supportedFileAccept = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png";
+const supportedFileExtensions = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "jpg", "jpeg", "png"];
+const supportedFileLabel = "PDF、Word、PPT、Excel、JPG、PNG";
+
 function parseDate(value) {
   if (!value) return null;
   const date = new Date(`${value}T00:00:00`);
@@ -335,6 +339,19 @@ function groupAttachments(files) {
   }, {});
 }
 
+function renderFileTools(event) {
+  if (isCloudSnapshot()) return "";
+  const exportUrl = `/api/export-files?eventId=${encodeURIComponent(event.id)}`;
+  return `
+    <div class="file-tools">
+      <input id="localImportInput" type="file" accept="${supportedFileAccept}" hidden />
+      <button class="primary-button" id="localImportButton" type="button">导入文件</button>
+      <a class="secondary-button" href="${exportUrl}" target="_blank" rel="noreferrer">导出全部</a>
+      <span id="localImportStatus">支持 ${supportedFileLabel}</span>
+    </div>
+  `;
+}
+
 function renderFileSections(files) {
   if (!files.length) {
     return `<div class="info-box"><p>暂无关联文件。</p></div>`;
@@ -350,10 +367,11 @@ function renderFileSections(files) {
               ${items
                 .map(
                   (file) => `
-                    <a class="file-link" href="${file.url}" target="_blank" rel="noreferrer">
-                      <span>${escapeHtml(file.name)}</span>
+                    <div class="file-link">
+                      <a class="file-name" href="${file.url}" target="_blank" rel="noreferrer">${escapeHtml(file.name)}</a>
                       <span>${escapeHtml(file.modifiedAt)}</span>
-                    </a>
+                      <a class="file-action" href="${file.url}" download>导出</a>
+                    </div>
                   `,
                 )
                 .join("")}
@@ -386,10 +404,11 @@ function renderCloudFileList(eventId) {
         ${cache.files
           .map(
             (file) => `
-              <a class="file-link" href="${file.url}" target="_blank" rel="noreferrer">
-                <span>${escapeHtml(file.name)}</span>
+              <div class="file-link">
+                <a class="file-name" href="${file.url}" target="_blank" rel="noreferrer">${escapeHtml(file.name)}</a>
                 <span>${escapeHtml(file.modifiedAt || "可下载")}</span>
-              </a>
+                <a class="file-action" href="${file.url}" download>导出</a>
+              </div>
             `,
           )
           .join("")}
@@ -406,10 +425,10 @@ function renderCloudUpload(eventId) {
     <h3 class="section-title">上传课件/附件</h3>
     <div class="upload-box">
       <div class="upload-row">
-        <input id="cloudUploadInput" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+        <input id="cloudUploadInput" type="file" accept="${supportedFileAccept}" />
         <button class="primary-button" id="cloudUploadButton" type="button">上传</button>
       </div>
-      <p class="upload-hint" id="cloudUploadStatus">支持 PDF、Word、PPT，单个文件不超过 50MB。</p>
+      <p class="upload-hint" id="cloudUploadStatus">支持 ${supportedFileLabel}，单个文件不超过 50MB。</p>
     </div>
     <h3 class="section-title">云端文件</h3>
     ${renderCloudFileList(eventId)}
@@ -445,12 +464,12 @@ function bindUploadControls(eventId) {
   button.addEventListener("click", async () => {
     const file = input.files && input.files[0];
     if (!file) {
-      status.textContent = "请先选择一个 PDF、Word 或 PPT 文件。";
+      status.textContent = `请先选择一个 ${supportedFileLabel} 文件。`;
       return;
     }
     const extension = file.name.split(".").pop().toLowerCase();
-    if (!["pdf", "doc", "docx", "ppt", "pptx"].includes(extension)) {
-      status.textContent = "文件格式不支持，请选择 PDF、Word 或 PPT。";
+    if (!supportedFileExtensions.includes(extension)) {
+      status.textContent = `文件格式不支持，请选择 ${supportedFileLabel}。`;
       return;
     }
     const formData = new FormData();
@@ -469,6 +488,44 @@ function bindUploadControls(eventId) {
       await loadCloudFiles(eventId);
     } catch (error) {
       status.textContent = `上传失败：${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
+function bindLocalFileControls(eventId) {
+  const input = document.querySelector("#localImportInput");
+  const button = document.querySelector("#localImportButton");
+  const status = document.querySelector("#localImportStatus");
+  if (!input || !button || !status) return;
+  button.addEventListener("click", () => input.click());
+  input.addEventListener("change", async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const extension = file.name.split(".").pop().toLowerCase();
+    if (!supportedFileExtensions.includes(extension)) {
+      status.textContent = `文件格式不支持，请选择 ${supportedFileLabel}。`;
+      input.value = "";
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    button.disabled = true;
+    status.textContent = "正在导入...";
+    try {
+      const response = await fetch(`/api/import-file?eventId=${encodeURIComponent(eventId)}`, {
+        method: "POST",
+        body: formData,
+      });
+      const payload = await response.json();
+      if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
+      status.textContent = "导入完成，文件列表已更新。";
+      input.value = "";
+      await loadEvents({ silent: true });
+      openDetail(eventId);
+    } catch (error) {
+      status.textContent = `导入失败：${error.message}`;
     } finally {
       button.disabled = false;
     }
@@ -532,11 +589,13 @@ function openDetail(eventId) {
       <p>${event.folderMatched ? escapeHtml(event.folderName) : "未找到资料文件夹"}</p>
     </div>
     <h3 class="section-title">相关文件</h3>
+    ${renderFileTools(event)}
     ${renderFileSections(event.attachments)}
     ${renderCloudUpload(event.id)}
   `;
   els.detailDrawer.classList.add("open");
   els.detailDrawer.setAttribute("aria-hidden", "false");
+  bindLocalFileControls(event.id);
   bindUploadControls(event.id);
   loadCloudFiles(event.id);
 }

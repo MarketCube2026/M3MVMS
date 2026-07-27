@@ -633,19 +633,59 @@ input:focus {
   font-size: 13px;
 }
 
+.file-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.file-tools span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .file-link {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 12px;
+  align-items: center;
   padding: 10px 12px;
-  color: var(--blue);
-  text-decoration: none;
   border-top: 1px solid var(--line);
 }
 
-.file-link span:last-child {
+.file-name {
+  overflow: hidden;
+  color: var(--blue);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-link span {
   color: var(--muted);
   font-size: 12px;
+}
+
+.file-action,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f8fbff;
+  color: var(--blue);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .upload-box {

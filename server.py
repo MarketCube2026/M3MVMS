@@ -9,6 +9,8 @@ import time as time_module
 import urllib.error
 import urllib.request
 import cgi
+import io
+import zipfile
 from datetime import date, datetime, time, timedelta
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -52,9 +54,14 @@ LOCAL_RELEVANT_EXTENSIONS = {
     ".pdf",
     ".ppt",
     ".pptx",
+    ".xls",
+    ".xlsx",
+    ".jpg",
+    ".jpeg",
+    ".png",
 }
 UPLOAD_EXTENSIONS = LOCAL_RELEVANT_EXTENSIONS
-EXCLUDED_ATTACHMENT_KEYWORDS = ("合同", "协议", "信息表", "汇总表")
+EXCLUDED_ATTACHMENT_KEYWORDS = ("合同", "协议", "汇总表")
 
 
 def normalize_header(value: Any) -> str:
@@ -137,7 +144,13 @@ def is_relevant_attachment(item: Path, category: str) -> bool:
 def normalize_attachment_category(category: str) -> str:
     if "课件" in category or "PPT" in category.upper():
         return "会议课件"
+    if "导入" in category or "附件" in category:
+        return "其他附件"
     return "其他附件"
+
+
+def supported_file_label() -> str:
+    return "PDF、Word、PPT、Excel、JPG、PNG"
 
 
 def folder_mtime(path: Path) -> float:
@@ -324,7 +337,7 @@ def upload_cloud_file(event_id: str, filename: str, content_type: str, data: byt
     safe_name = clean_storage_filename(filename)
     extension = Path(safe_name).suffix.lower()
     if extension not in UPLOAD_EXTENSIONS:
-        raise RuntimeError("仅支持上传 PDF、Word、PPT 文件")
+        raise RuntimeError(f"仅支持上传 {supported_file_label()} 文件")
     path = f"{storage_event_id(event_id)}/{safe_name}"
     headers = storage_headers(content_type or mimetypes.guess_type(safe_name)[0] or "application/octet-stream")
     headers["x-upsert"] = "true"
@@ -333,6 +346,51 @@ def upload_cloud_file(event_id: str, filename: str, content_type: str, data: byt
         "name": safe_name,
         "path": path,
         "url": "/api/cloud-download?path=" + quote(path, safe="/"),
+    }
+
+
+def find_event_folder(event_id: str) -> Path | None:
+    events_payload = read_master_events()
+    for event in events_payload.get("events", []):
+        if event.get("id") != event_id:
+            continue
+        folder_path = event.get("folderPath")
+        if not folder_path:
+            return None
+        folder = (SM_DIR / Path(folder_path)).resolve()
+        try:
+            folder.relative_to(SM_DIR.resolve())
+        except ValueError:
+            return None
+        return folder if folder.exists() and folder.is_dir() else None
+    return None
+
+
+def import_local_file(event_id: str, filename: str, data: bytes) -> dict[str, Any]:
+    folder = find_event_folder(event_id)
+    if folder is None:
+        raise RuntimeError("未找到该会议的资料文件夹，无法导入文件")
+    safe_name = clean_storage_filename(filename)
+    extension = Path(safe_name).suffix.lower()
+    if extension not in UPLOAD_EXTENSIONS:
+        raise RuntimeError(f"仅支持导入 {supported_file_label()} 文件")
+    target_dir = folder / "导入附件"
+    target_dir.mkdir(exist_ok=True)
+    target = (target_dir / safe_name).resolve()
+    target.relative_to(SM_DIR.resolve())
+    if target.exists():
+        stem = target.stem
+        suffix = target.suffix
+        target = target.with_name(f"{stem}-{datetime.now().strftime('%Y%m%d%H%M%S')}{suffix}")
+    target.write_bytes(data)
+    return {
+        "name": target.name,
+        "category": "其他附件",
+        "relativePath": safe_relative_path(target),
+        "url": file_url(target),
+        "extension": target.suffix.lower(),
+        "size": target.stat().st_size,
+        "modifiedAt": datetime.fromtimestamp(target.stat().st_mtime).strftime("%Y-%m-%d %H:%M"),
     }
 
 
@@ -433,6 +491,10 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
             path = parse_qs(parsed.query).get("path", [""])[0]
             self.serve_cloud_download(path)
             return
+        if parsed.path == "/api/export-files":
+            event_id = parse_qs(parsed.query).get("eventId", [""])[0]
+            self.serve_export_files(event_id)
+            return
         if parsed.path.startswith("/files/"):
             self.serve_sm_file(parsed.path.removeprefix("/files/"))
             return
@@ -445,6 +507,10 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/upload":
             event_id = parse_qs(parsed.query).get("eventId", [""])[0]
             self.handle_upload(event_id)
+            return
+        if parsed.path == "/api/import-file":
+            event_id = parse_qs(parsed.query).get("eventId", [""])[0]
+            self.handle_import_file(event_id)
             return
         self.send_error(HTTPStatus.NOT_FOUND, "接口不存在")
 
@@ -515,6 +581,63 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
             self.send_json({"ok": True, "file": uploaded})
         except Exception as exc:
             self.send_json({"error": str(exc)}, HTTPStatus.BAD_GATEWAY)
+
+    def handle_import_file(self, event_id: str) -> None:
+        if not event_id:
+            self.send_json({"error": "缺少会议 ID"}, HTTPStatus.BAD_REQUEST)
+            return
+        form = cgi.FieldStorage(
+            fp=self.rfile,
+            headers=self.headers,
+            environ={
+                "REQUEST_METHOD": "POST",
+                "CONTENT_TYPE": self.headers.get("Content-Type", ""),
+            },
+        )
+        file_item = form["file"] if "file" in form else None
+        if file_item is None or not getattr(file_item, "filename", ""):
+            self.send_json({"error": "请选择要导入的文件"}, HTTPStatus.BAD_REQUEST)
+            return
+        data = file_item.file.read()
+        if len(data) > 80 * 1024 * 1024:
+            self.send_json({"error": "单个文件不能超过 80MB"}, HTTPStatus.BAD_REQUEST)
+            return
+        try:
+            imported = import_local_file(event_id, file_item.filename, data)
+            self.send_json({"ok": True, "file": imported})
+        except Exception as exc:
+            self.send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
+
+    def serve_export_files(self, event_id: str) -> None:
+        if not event_id:
+            self.send_error(HTTPStatus.BAD_REQUEST, "缺少会议 ID")
+            return
+        folder = find_event_folder(event_id)
+        if folder is None:
+            self.send_error(HTTPStatus.NOT_FOUND, "未找到该会议的资料文件夹")
+            return
+        files = scan_attachments(folder)
+        if not files:
+            self.send_error(HTTPStatus.NOT_FOUND, "当前会议暂无可导出的相关文件")
+            return
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for file in files:
+                source = (SM_DIR / Path(file["relativePath"])).resolve()
+                try:
+                    source.relative_to(SM_DIR.resolve())
+                except ValueError:
+                    continue
+                if source.is_file():
+                    archive.write(source, arcname=f"{file['category']}/{source.name}")
+        data = buffer.getvalue()
+        filename = f"{storage_event_id(event_id)}-相关文件.zip"
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "application/zip")
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Content-Disposition", f"attachment; filename*=UTF-8''{quote(filename)}")
+        self.end_headers()
+        self.wfile.write(data)
 
     def serve_sm_file(self, encoded_relative_path: str) -> None:
         relative = unquote(encoded_relative_path)
