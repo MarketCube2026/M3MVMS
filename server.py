@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import mimetypes
 import os
 import posixpath
 import re
 import time as time_module
+import unicodedata
 import urllib.error
 import urllib.request
 import cgi
@@ -261,6 +263,23 @@ def scan_attachments(folder: Path | None) -> list[dict[str, Any]]:
     return sorted(files, key=lambda f: (f["category"], f["name"]))
 
 
+def attachment_version_key(file: dict[str, Any]) -> str:
+    return clean_value(file.get("modifiedAt")).replace("T", " ")
+
+
+def latest_attachment_versions(files: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    latest: dict[str, dict[str, Any]] = {}
+    for file in files:
+        name = clean_value(file.get("name"))
+        if not name:
+            continue
+        key = name.casefold()
+        current = latest.get(key)
+        if current is None or attachment_version_key(file) >= attachment_version_key(current):
+            latest[key] = file
+    return sorted(latest.values(), key=lambda file: (clean_value(file.get("category")), clean_value(file.get("name")).casefold()))
+
+
 def extract_local_excel_tables(folder: Path | None) -> list[dict[str, Any]]:
     if folder is None:
         return []
@@ -296,14 +315,32 @@ def supabase_configured() -> bool:
 
 
 def storage_event_id(value: str) -> str:
-    cleaned = re.sub(r"[^\w\u4e00-\u9fff.-]+", "-", value or "unknown", flags=re.UNICODE).strip(".-")
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", value or "unknown").strip(".-")
     return cleaned or "unknown"
+
+
+def ascii_storage_name(value: str, fallback: str) -> str:
+    raw = clean_value(value)
+    normalized = unicodedata.normalize("NFKD", raw).encode("ascii", "ignore").decode("ascii")
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", normalized).strip(".-_")
+    digest = hashlib.sha1(raw.encode("utf-8", errors="ignore")).hexdigest()[:10]
+    if cleaned:
+        base = cleaned[:96].strip(".-_") or fallback
+        if any(ord(char) > 127 for char in raw):
+            if len(base) < 4:
+                base = fallback
+            return f"{base}-{digest}"
+        return base
+    return f"{fallback}-{digest}"
 
 
 def clean_storage_filename(value: str) -> str:
     name = Path(value or "attachment").name
     name = re.sub(r"[\r\n\t/\\]+", "-", name).strip(" .")
-    return name or f"attachment-{int(time_module.time())}"
+    suffix = Path(name).suffix.lower()
+    stem = name[: -len(suffix)] if suffix else name
+    safe_stem = ascii_storage_name(stem, "attachment")
+    return f"{safe_stem}{suffix}" if suffix else safe_stem
 
 
 def storage_headers(content_type: str = "application/json") -> dict[str, str]:
@@ -327,6 +364,8 @@ def storage_request(
             return response.status, dict(response.headers.items()), response.read()
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="ignore")
+        if exc.code == HTTPStatus.REQUEST_ENTITY_TOO_LARGE or "Request Entity Too Large" in detail:
+            detail = "文件过大：Supabase Storage 或 Vercel 请求体限制拒绝了上传，请压缩文件或调高 Storage bucket 的文件大小限制后再试。"
         raise RuntimeError(detail or str(exc)) from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(str(exc)) from exc
@@ -419,13 +458,16 @@ def list_cloud_files(event_id: str) -> list[dict[str, Any]]:
         files.append(
             {
                 "name": basename,
+                "category": "课件/附件",
                 "path": path,
                 "url": "/api/cloud-download?path=" + quote(path, safe="/"),
+                "extension": Path(basename).suffix.lower(),
                 "modifiedAt": clean_value(item.get("updated_at") or item.get("created_at"))[:16],
                 "size": item.get("metadata", {}).get("size", 0),
+                "source": "cloud",
             }
         )
-    return files
+    return latest_attachment_versions(files)
 
 
 def upload_cloud_file(event_id: str, filename: str, content_type: str, data: bytes) -> dict[str, Any]:
@@ -442,6 +484,33 @@ def upload_cloud_file(event_id: str, filename: str, content_type: str, data: byt
     return {
         "name": safe_name,
         "path": path,
+        "url": "/api/cloud-download?path=" + quote(path, safe="/"),
+    }
+
+
+def create_signed_upload(event_id: str, filename: str, content_type: str) -> dict[str, Any]:
+    if not supabase_configured():
+        raise RuntimeError("未配置 Supabase Storage")
+    safe_name = clean_storage_filename(filename)
+    extension = Path(safe_name).suffix.lower()
+    if extension not in UPLOAD_EXTENSIONS:
+        raise RuntimeError(f"仅支持上传 {supported_file_label()} 文件")
+    path = f"{storage_event_id(event_id)}/{safe_name}"
+    headers = storage_headers("application/json")
+    headers["x-upsert"] = "true"
+    url = f"{SUPABASE_URL}/storage/v1/object/upload/sign/{SUPABASE_BUCKET}/{quote(path, safe='/')}"
+    _, _, body = storage_request("POST", url, b"{}", headers)
+    payload = json.loads(body.decode("utf-8") or "{}")
+    signed_url = payload.get("signedURL") or payload.get("signedUrl") or payload.get("url")
+    if not signed_url:
+        raise RuntimeError("Supabase 未返回上传地址")
+    if signed_url.startswith("/"):
+        signed_url = f"{SUPABASE_URL}/storage/v1{signed_url}"
+    return {
+        "name": safe_name,
+        "path": path,
+        "signedUrl": signed_url,
+        "contentType": content_type or mimetypes.guess_type(safe_name)[0] or "application/octet-stream",
         "url": "/api/cloud-download?path=" + quote(path, safe="/"),
     }
 
@@ -716,9 +785,16 @@ def read_master_events() -> dict[str, Any]:
         event_date = excel_date_to_iso(values.get("日期")) or infer_date_from_text(title)
         event_date_key = date_key(event_date)
         folder = match_folder(event_date_key, title, folders)
-        attachments = scan_attachments(folder)
-        local_tables = extract_local_excel_tables(folder)
         project_id = clean_value(values.get("项目编号")) or f"row-{row_index}"
+        local_attachments = scan_attachments(folder)
+        cloud_attachments: list[dict[str, Any]] = []
+        if supabase_configured():
+            try:
+                cloud_attachments = list_cloud_files(project_id)
+            except Exception:
+                cloud_attachments = []
+        attachments = latest_attachment_versions(cloud_attachments if supabase_configured() else local_attachments)
+        local_tables = extract_local_excel_tables(folder)
 
         events.append(
             {
@@ -824,6 +900,10 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
             event_id = parse_qs(parsed.query).get("eventId", [""])[0]
             self.handle_upload(event_id)
             return
+        if parsed.path == "/api/upload-url":
+            event_id = parse_qs(parsed.query).get("eventId", [""])[0]
+            self.handle_upload_url(event_id)
+            return
         if parsed.path == "/api/import-file":
             event_id = parse_qs(parsed.query).get("eventId", [""])[0]
             self.handle_import_file(event_id)
@@ -903,6 +983,9 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
         if not supabase_configured():
             self.send_json({"error": "未配置 Supabase Storage"}, HTTPStatus.SERVICE_UNAVAILABLE)
             return
+        if not self.headers.get("Content-Type", "").lower().startswith("multipart/form-data"):
+            self.send_json({"error": "请使用文件表单上传"}, HTTPStatus.BAD_REQUEST)
+            return
         form = cgi.FieldStorage(
             fp=self.rfile,
             headers=self.headers,
@@ -926,9 +1009,27 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
         except Exception as exc:
             self.send_json({"error": str(exc)}, HTTPStatus.BAD_GATEWAY)
 
+    def handle_upload_url(self, event_id: str) -> None:
+        if not event_id:
+            self.send_json({"error": "缺少会议 ID"}, HTTPStatus.BAD_REQUEST)
+            return
+        try:
+            payload = self.read_json_body()
+            filename = clean_value(payload.get("filename"))
+            if not filename:
+                self.send_json({"error": "缺少文件名"}, HTTPStatus.BAD_REQUEST)
+                return
+            signed = create_signed_upload(event_id, filename, clean_value(payload.get("contentType")))
+            self.send_json({"ok": True, "upload": signed})
+        except Exception as exc:
+            self.send_json({"error": str(exc)}, HTTPStatus.BAD_GATEWAY)
+
     def handle_import_file(self, event_id: str) -> None:
         if not event_id:
             self.send_json({"error": "缺少会议 ID"}, HTTPStatus.BAD_REQUEST)
+            return
+        if not self.headers.get("Content-Type", "").lower().startswith("multipart/form-data"):
+            self.send_json({"error": "请使用文件表单导入"}, HTTPStatus.BAD_REQUEST)
             return
         form = cgi.FieldStorage(
             fp=self.rfile,
@@ -953,6 +1054,9 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
             self.send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
 
     def handle_import_events(self) -> None:
+        if not self.headers.get("Content-Type", "").lower().startswith("multipart/form-data"):
+            self.send_json({"error": "请使用会议 Excel 文件表单导入"}, HTTPStatus.BAD_REQUEST)
+            return
         form = cgi.FieldStorage(
             fp=self.rfile,
             headers=self.headers,
@@ -996,11 +1100,36 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
         if not event_id:
             self.send_error(HTTPStatus.BAD_REQUEST, "缺少会议 ID")
             return
+        if supabase_configured():
+            try:
+                cloud_files = list_cloud_files(event_id)
+            except Exception:
+                cloud_files = []
+            if cloud_files:
+                buffer = io.BytesIO()
+                with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                    for file in cloud_files:
+                        path = clean_value(file.get("path"))
+                        if not path:
+                            continue
+                        try:
+                            archive.writestr(f"课件-附件/{file['name']}", get_storage_object(path))
+                        except Exception:
+                            continue
+                data = buffer.getvalue()
+                filename = f"{storage_event_id(event_id)}-课件附件.zip"
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "application/zip")
+                self.send_header("Content-Length", str(len(data)))
+                self.send_header("Content-Disposition", f"attachment; filename*=UTF-8''{quote(filename)}")
+                self.end_headers()
+                self.wfile.write(data)
+                return
         folder = find_event_folder(event_id)
         if folder is None:
-            self.send_error(HTTPStatus.NOT_FOUND, "未找到该会议的资料文件夹")
+            self.send_error(HTTPStatus.NOT_FOUND, "当前会议暂无可导出的课件/附件")
             return
-        files = scan_attachments(folder)
+        files = latest_attachment_versions(scan_attachments(folder))
         if not files:
             self.send_error(HTTPStatus.NOT_FOUND, "当前会议暂无可导出的相关文件")
             return

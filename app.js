@@ -2,6 +2,8 @@ const state = {
   events: [],
   dataVersion: null,
   cloudFiles: {},
+  activeDetailEventId: "",
+  cloudRefreshTimer: null,
   currentDate: new Date(),
   viewMode: "month",
   filters: {
@@ -52,6 +54,7 @@ const els = {
 const supportedFileAccept = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png";
 const supportedFileExtensions = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "jpg", "jpeg", "png"];
 const supportedFileLabel = "PDF、Word、PPT、Excel、JPG、PNG";
+const cloudUploadLimitBytes = 50 * 1024 * 1024;
 const meetingFormFields = [
   ["projectId", "项目编号", "text", "留空将自动生成"],
   ["title", "活动/会议名称", "text", "必填"],
@@ -73,6 +76,44 @@ function parseDate(value) {
   if (!value) return null;
   const date = new Date(`${value}T00:00:00`);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatFileSize(bytes) {
+  if (!Number.isFinite(bytes)) return "";
+  const units = ["B", "KB", "MB", "GB"];
+  let value = bytes;
+  let index = 0;
+  while (value >= 1024 && index < units.length - 1) {
+    value /= 1024;
+    index += 1;
+  }
+  return `${value.toFixed(index === 0 ? 0 : 1)} ${units[index]}`;
+}
+
+async function readApiResponse(response) {
+  const text = await response.text();
+  if (!text.trim()) return {};
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    const message = text.replace(/\s+/g, " ").trim();
+    return { error: message.length > 300 ? `${message.slice(0, 300)}...` : message || `HTTP ${response.status}` };
+  }
+}
+
+async function uploadFileToSignedUrl(signedUrl, file) {
+  const formData = new FormData();
+  formData.append("cacheControl", "3600");
+  formData.append("", file);
+  const response = await fetch(signedUrl, {
+    method: "PUT",
+    headers: { "x-upsert": "true" },
+    body: formData,
+  });
+  if (!response.ok) {
+    const message = (await response.text()).replace(/\s+/g, " ").trim();
+    throw new Error(message || `HTTP ${response.status}`);
+  }
 }
 
 function formatMonth(date) {
@@ -193,7 +234,6 @@ function statusClass(status) {
 
 function renderSummary(events) {
   const visible = visiblePeriodEvents(events);
-  const withFolders = visible.filter((event) => event.folderMatched).length;
   const attachments = visible.reduce((sum, event) => sum + event.attachments.length, 0);
   const guests = new Set(visible.flatMap((event) => event.guests || [])).size;
   const active = visible.filter((event) => !event.status.includes("完成")).length;
@@ -202,7 +242,6 @@ function renderSummary(events) {
     [`${labelPrefix}会议`, visible.length],
     ["未完成/推进中", active],
     ["涉及嘉宾", guests],
-    ["已匹配资料夹", withFolders],
     ["关联文件", attachments],
   ];
   els.summaryStrip.innerHTML = metrics
@@ -460,55 +499,15 @@ function render() {
   }
 }
 
-function groupAttachments(files) {
-  return files.reduce((groups, file) => {
-    const key = file.category || "其他";
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(file);
-    return groups;
-  }, {});
-}
-
 function renderFileTools(event) {
   if (isCloudSnapshot()) return "";
   const exportUrl = `/api/export-files?eventId=${encodeURIComponent(event.id)}`;
   return `
     <div class="file-tools">
-      <input id="localImportInput" type="file" accept="${supportedFileAccept}" hidden />
-      <button class="primary-button" id="localImportButton" type="button">导入文件</button>
-      <a class="secondary-button" href="${exportUrl}" target="_blank" rel="noreferrer">导出全部</a>
-      <span id="localImportStatus">支持 ${supportedFileLabel}</span>
-    </div>
-  `;
-}
-
-function renderFileSections(files) {
-  if (!files.length) {
-    return `<div class="info-box"><p>暂无关联文件。</p></div>`;
-  }
-  const groups = groupAttachments(files);
-  return `
-    <div class="file-section">
-      ${Object.entries(groups)
-        .map(
-          ([category, items]) => `
-            <div class="file-group">
-              <h4>${escapeHtml(category)}</h4>
-              ${items
-                .map(
-                  (file) => `
-                    <div class="file-link">
-                      <a class="file-name" href="${file.url}" target="_blank" rel="noreferrer">${escapeHtml(file.name)}</a>
-                      <span>${escapeHtml(file.modifiedAt)}</span>
-                      <a class="file-action" href="${file.url}" download>导出</a>
-                    </div>
-                  `,
-                )
-                .join("")}
-            </div>
-          `,
-        )
-        .join("")}
+      <input id="cloudUploadInput" type="file" accept="${supportedFileAccept}" hidden />
+      <button class="primary-button" id="cloudUploadButton" type="button">上传文件</button>
+      <a class="secondary-button" href="${exportUrl}" target="_blank" rel="noreferrer">下载全部</a>
+      <span id="cloudUploadStatus">支持 ${supportedFileLabel}，单个文件不超过 50MB。</span>
     </div>
   `;
 }
@@ -537,7 +536,7 @@ function renderCloudFileList(eventId) {
               <div class="file-link">
                 <a class="file-name" href="${file.url}" target="_blank" rel="noreferrer">${escapeHtml(file.name)}</a>
                 <span>${escapeHtml(file.modifiedAt || "可下载")}</span>
-                <a class="file-action" href="${file.url}" download>导出</a>
+                <a class="file-action" href="${file.url}" download>下载</a>
               </div>
             `,
           )
@@ -551,24 +550,7 @@ function renderAttachmentArea(event) {
   return `
     <h3 class="section-title">课件/附件</h3>
     ${renderFileTools(event)}
-    ${renderFileSections(event.attachments)}
-    ${renderCloudUpload(event.id)}
-  `;
-}
-
-function renderCloudUpload(eventId) {
-  if (isCloudSnapshot()) {
-    return "";
-  }
-  return `
-    <div class="upload-box">
-      <div class="upload-row">
-        <input id="cloudUploadInput" type="file" accept="${supportedFileAccept}" />
-        <button class="primary-button" id="cloudUploadButton" type="button">上传</button>
-      </div>
-      <p class="upload-hint" id="cloudUploadStatus">支持 ${supportedFileLabel}，单个文件不超过 50MB。</p>
-    </div>
-    ${renderCloudFileList(eventId)}
+    ${renderCloudFileList(event.id)}
   `;
 }
 
@@ -576,7 +558,7 @@ async function loadCloudFiles(eventId) {
   if (isCloudSnapshot()) return;
   try {
     const response = await fetch(`/api/cloud-files?eventId=${encodeURIComponent(eventId)}&ts=${Date.now()}`);
-    const payload = await response.json();
+    const payload = await readApiResponse(response);
     state.cloudFiles[eventId] = {
       configured: Boolean(payload.configured),
       files: payload.files || [],
@@ -598,44 +580,6 @@ function bindUploadControls(eventId) {
   const button = document.querySelector("#cloudUploadButton");
   const status = document.querySelector("#cloudUploadStatus");
   if (!input || !button || !status) return;
-  button.addEventListener("click", async () => {
-    const file = input.files && input.files[0];
-    if (!file) {
-      status.textContent = `请先选择一个 ${supportedFileLabel} 文件。`;
-      return;
-    }
-    const extension = file.name.split(".").pop().toLowerCase();
-    if (!supportedFileExtensions.includes(extension)) {
-      status.textContent = `文件格式不支持，请选择 ${supportedFileLabel}。`;
-      return;
-    }
-    const formData = new FormData();
-    formData.append("file", file);
-    button.disabled = true;
-    status.textContent = "正在上传...";
-    try {
-      const response = await fetch(`/api/upload?eventId=${encodeURIComponent(eventId)}`, {
-        method: "POST",
-        body: formData,
-      });
-      const payload = await response.json();
-      if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
-      status.textContent = "上传完成，云端文件列表已更新。";
-      input.value = "";
-      await loadCloudFiles(eventId);
-    } catch (error) {
-      status.textContent = `上传失败：${error.message}`;
-    } finally {
-      button.disabled = false;
-    }
-  });
-}
-
-function bindLocalFileControls(eventId) {
-  const input = document.querySelector("#localImportInput");
-  const button = document.querySelector("#localImportButton");
-  const status = document.querySelector("#localImportStatus");
-  if (!input || !button || !status) return;
   button.addEventListener("click", () => input.click());
   input.addEventListener("change", async () => {
     const file = input.files && input.files[0];
@@ -646,27 +590,54 @@ function bindLocalFileControls(eventId) {
       input.value = "";
       return;
     }
-    const formData = new FormData();
-    formData.append("file", file);
-    button.disabled = true;
-    status.textContent = "正在导入...";
-    try {
-      const response = await fetch(`/api/import-file?eventId=${encodeURIComponent(eventId)}`, {
-        method: "POST",
-        body: formData,
-      });
-      const payload = await response.json();
-      if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
-      status.textContent = "导入完成，文件列表已更新。";
+    if (file.size > cloudUploadLimitBytes) {
+      status.textContent = `文件过大：${formatFileSize(file.size)}，单个文件不能超过 ${formatFileSize(cloudUploadLimitBytes)}。`;
       input.value = "";
+      return;
+    }
+    button.disabled = true;
+    status.textContent = "正在准备上传...";
+    try {
+      const response = await fetch(`/api/upload-url?eventId=${encodeURIComponent(eventId)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: file.name, contentType: file.type || "application/octet-stream" }),
+      });
+      const payload = await readApiResponse(response);
+      if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
+      status.textContent = "正在上传到云端...";
+      await uploadFileToSignedUrl(payload.upload.signedUrl, file);
+      status.textContent = "上传完成，云端文件列表已更新。";
+      input.value = "";
+      await loadCloudFiles(eventId);
       await loadEvents({ silent: true });
-      openDetail(eventId);
     } catch (error) {
-      status.textContent = `导入失败：${error.message}`;
+      status.textContent = `上传失败：${error.message}`;
     } finally {
       button.disabled = false;
     }
   });
+}
+
+function startCloudFileSync(eventId) {
+  if (state.cloudRefreshTimer) {
+    clearInterval(state.cloudRefreshTimer);
+  }
+  state.activeDetailEventId = eventId;
+  loadCloudFiles(eventId);
+  state.cloudRefreshTimer = window.setInterval(() => {
+    if (state.activeDetailEventId === eventId && els.detailDrawer.classList.contains("open")) {
+      loadCloudFiles(eventId);
+    }
+  }, 30000);
+}
+
+function stopCloudFileSync() {
+  state.activeDetailEventId = "";
+  if (state.cloudRefreshTimer) {
+    clearInterval(state.cloudRefreshTimer);
+    state.cloudRefreshTimer = null;
+  }
 }
 
 function renderMeetingForm() {
@@ -733,7 +704,7 @@ function bindEventForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const result = await response.json();
+      const result = await readApiResponse(response);
       if (!response.ok || result.error) throw new Error(result.error || `HTTP ${response.status}`);
       status.textContent = "保存完成。";
       await loadEvents({ silent: true });
@@ -748,7 +719,7 @@ async function deleteEvent(eventId) {
   if (!eventId || !window.confirm("确认删除这场会议吗？该操作会从会议汇总 Excel 中移除该行。")) return;
   try {
     const response = await fetch(`/api/events?eventId=${encodeURIComponent(eventId)}`, { method: "DELETE" });
-    const payload = await response.json();
+    const payload = await readApiResponse(response);
     if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
     await loadEvents({ silent: true });
     closeDetail();
@@ -782,7 +753,7 @@ function bindEventDataTools() {
         method: "POST",
         body: formData,
       });
-      const payload = await response.json();
+      const payload = await readApiResponse(response);
       if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
       await loadEvents({ silent: true });
       window.alert(`导入完成：新增 ${payload.created} 条，更新 ${payload.updated} 条，跳过 ${payload.skipped} 条。`);
@@ -794,32 +765,6 @@ function bindEventDataTools() {
       els.eventImportButton.textContent = "导入会议Excel";
     }
   });
-}
-
-function renderLocalTables(tables) {
-  if (!tables.length) return "";
-  return `
-    <h3 class="section-title">补充信息表</h3>
-    ${tables
-      .map((table) => {
-        if (table.error) {
-          return `<div class="info-box"><p>${escapeHtml(table.fileName)} 读取失败：${escapeHtml(table.error)}</p></div>`;
-        }
-        return `
-          <div class="table-section">
-            <h4><a href="${table.url}" target="_blank" rel="noreferrer">${escapeHtml(table.fileName)}</a> · ${escapeHtml(table.sheetName)}</h4>
-            <table>
-              <tbody>
-                ${table.rows
-                  .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`)
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
-        `;
-      })
-      .join("")}
-  `;
 }
 
 function openDetail(eventId) {
@@ -849,21 +794,17 @@ function openDetail(eventId) {
       <div class="info-box"><span>关键进度/问题</span><p>${escapeHtml(event.progress || "未填写")}</p></div>
       <div class="info-box"><span>讲题/内容</span><p>${escapeHtml(event.topic || "未填写")}</p></div>
     </section>
-    <h3 class="section-title">资料文件夹</h3>
-    <div class="info-box">
-      <p>${event.folderMatched ? escapeHtml(event.folderName) : "未找到资料文件夹"}</p>
-    </div>
     ${renderAttachmentArea(event)}
   `;
   els.detailDrawer.classList.add("open");
   els.detailDrawer.setAttribute("aria-hidden", "false");
   document.querySelector("#deleteEventButton")?.addEventListener("click", () => deleteEvent(event.id));
-  bindLocalFileControls(event.id);
   bindUploadControls(event.id);
-  loadCloudFiles(event.id);
+  startCloudFileSync(event.id);
 }
 
 function closeDetail() {
+  stopCloudFileSync();
   els.detailDrawer.classList.remove("open");
   els.detailDrawer.setAttribute("aria-hidden", "true");
 }
@@ -880,9 +821,8 @@ async function loadEvents({ silent = false } = {}) {
     if (!response.ok && !isGithubPages) {
       response = await fetch(`./events.json?ts=${Date.now()}`);
     }
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const payload = await response.json();
-    if (payload.error) throw new Error(payload.error);
+    const payload = await readApiResponse(response);
+    if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
     state.events = payload.events || [];
     state.dataVersion = payload.dataVersion;
     refreshFilterOptions();
