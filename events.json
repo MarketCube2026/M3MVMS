@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-23 13:59:34",
+  "generatedAt": "2026-07-27 10:48:47",
   "sourceFile": "汇总表-市场部市场活动计划汇总.xlsx",
   "sourceModifiedAt": "2026-07-14 14:26:06",
   "dataVersion": 1784546569.3412256,
@@ -33,31 +33,22 @@
       "folderMatched": true,
       "attachments": [
         {
-          "name": "2.3检测公司合作会议日程.pptx",
-          "category": "日程",
-          "relativePath": "20260203 东一区-药企合作少见靶点学院（南京）/日程/2.3检测公司合作会议日程.pptx",
-          "url": "/files/20260203%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E8%8D%AF%E4%BC%81%E5%90%88%E4%BD%9C%E5%B0%91%E8%A7%81%E9%9D%B6%E7%82%B9%E5%AD%A6%E9%99%A2%EF%BC%88%E5%8D%97%E4%BA%AC%EF%BC%89/%E6%97%A5%E7%A8%8B/2.3%E6%A3%80%E6%B5%8B%E5%85%AC%E5%8F%B8%E5%90%88%E4%BD%9C%E4%BC%9A%E8%AE%AE%E6%97%A5%E7%A8%8B.pptx",
-          "extension": ".pptx",
-          "size": 4494968,
-          "modifiedAt": "2026-01-30 14:16"
-        },
-        {
-          "name": "初步日程.jpg",
-          "category": "日程",
-          "relativePath": "20260203 东一区-药企合作少见靶点学院（南京）/日程/初步日程.jpg",
-          "url": "/files/20260203%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E8%8D%AF%E4%BC%81%E5%90%88%E4%BD%9C%E5%B0%91%E8%A7%81%E9%9D%B6%E7%82%B9%E5%AD%A6%E9%99%A2%EF%BC%88%E5%8D%97%E4%BA%AC%EF%BC%89/%E6%97%A5%E7%A8%8B/%E5%88%9D%E6%AD%A5%E6%97%A5%E7%A8%8B.jpg",
-          "extension": ".jpg",
-          "size": 384825,
-          "modifiedAt": "2026-01-14 16:18"
-        },
-        {
           "name": "泛肿瘤罕见靶点检测临床应用及探讨-V2.pptx",
-          "category": "课件",
+          "category": "会议课件",
           "relativePath": "20260203 东一区-药企合作少见靶点学院（南京）/课件/泛肿瘤罕见靶点检测临床应用及探讨-V2.pptx",
           "url": "/files/20260203%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E8%8D%AF%E4%BC%81%E5%90%88%E4%BD%9C%E5%B0%91%E8%A7%81%E9%9D%B6%E7%82%B9%E5%AD%A6%E9%99%A2%EF%BC%88%E5%8D%97%E4%BA%AC%EF%BC%89/%E8%AF%BE%E4%BB%B6/%E6%B3%9B%E8%82%BF%E7%98%A4%E7%BD%95%E8%A7%81%E9%9D%B6%E7%82%B9%E6%A3%80%E6%B5%8B%E4%B8%B4%E5%BA%8A%E5%BA%94%E7%94%A8%E5%8F%8A%E6%8E%A2%E8%AE%A8-V2.pptx",
           "extension": ".pptx",
           "size": 10098107,
           "modifiedAt": "2026-01-14 16:20"
+        },
+        {
+          "name": "2.3检测公司合作会议日程.pptx",
+          "category": "其他附件",
+          "relativePath": "20260203 东一区-药企合作少见靶点学院（南京）/日程/2.3检测公司合作会议日程.pptx",
+          "url": "/files/20260203%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E8%8D%AF%E4%BC%81%E5%90%88%E4%BD%9C%E5%B0%91%E8%A7%81%E9%9D%B6%E7%82%B9%E5%AD%A6%E9%99%A2%EF%BC%88%E5%8D%97%E4%BA%AC%EF%BC%89/%E6%97%A5%E7%A8%8B/2.3%E6%A3%80%E6%B5%8B%E5%85%AC%E5%8F%B8%E5%90%88%E4%BD%9C%E4%BC%9A%E8%AE%AE%E6%97%A5%E7%A8%8B.pptx",
+          "extension": ".pptx",
+          "size": 4494968,
+          "modifiedAt": "2026-01-30 14:16"
         }
       ],
       "localTables": []
@@ -90,134 +81,8 @@
       "folderMatched": true,
       "attachments": [
         {
-          "name": "1.蒋奎荣教授大会简历及照片.pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/1.蒋奎荣教授大会简历及照片.pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/1.%E8%92%8B%E5%A5%8E%E8%8D%A3%E6%95%99%E6%8E%88%E5%A4%A7%E4%BC%9A%E7%AE%80%E5%8E%86%E5%8F%8A%E7%85%A7%E7%89%87.pptx",
-          "extension": ".pptx",
-          "size": 5421409,
-          "modifiedAt": "2026-03-06 17:40"
-        },
-        {
-          "name": "2.刘付宝简介.pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/2.刘付宝简介.pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/2.%E5%88%98%E4%BB%98%E5%AE%9D%E7%AE%80%E4%BB%8B.pptx",
-          "extension": ".pptx",
-          "size": 7744724,
-          "modifiedAt": "2026-03-09 15:33"
-        },
-        {
-          "name": "3.陆子鹏简介_20260309(1).pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/3.陆子鹏简介_20260309(1).pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/3.%E9%99%86%E5%AD%90%E9%B9%8F%E7%AE%80%E4%BB%8B_20260309%281%29.pptx",
-          "extension": ".pptx",
-          "size": 8212823,
-          "modifiedAt": "2026-03-09 11:35"
-        },
-        {
-          "name": "4.杜娟 简介 2026.pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/4.杜娟 简介 2026.pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/4.%E6%9D%9C%E5%A8%9F%20%E7%AE%80%E4%BB%8B%202026.pptx",
-          "extension": ".pptx",
-          "size": 146049,
-          "modifiedAt": "2026-03-04 16:20"
-        },
-        {
-          "name": "5_2025-王新波简历.pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/5_2025-王新波简历.pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/5_2025-%E7%8E%8B%E6%96%B0%E6%B3%A2%E7%AE%80%E5%8E%86.pptx",
-          "extension": ".pptx",
-          "size": 2537138,
-          "modifiedAt": "2026-03-10 11:42"
-        },
-        {
-          "name": "串场PPT—3.14肺癌全程管理及MRD临床应用学术研讨会.pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/串场PPT—3.14肺癌全程管理及MRD临床应用学术研讨会.pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E4%B8%B2%E5%9C%BAPPT%E2%80%943.14%E8%82%BA%E7%99%8C%E5%85%A8%E7%A8%8B%E7%AE%A1%E7%90%86%E5%8F%8AMRD%E4%B8%B4%E5%BA%8A%E5%BA%94%E7%94%A8%E5%AD%A6%E6%9C%AF%E7%A0%94%E8%AE%A8%E4%BC%9A.pptx",
-          "extension": ".pptx",
-          "size": 40003022,
-          "modifiedAt": "2026-03-14 08:40"
-        },
-        {
-          "name": "李刚 专家简介.pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/李刚 专家简介.pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E6%9D%8E%E5%88%9A%20%E4%B8%93%E5%AE%B6%E7%AE%80%E4%BB%8B.pptx",
-          "extension": ".pptx",
-          "size": 1279994,
-          "modifiedAt": "2026-03-04 16:20"
-        },
-        {
-          "name": "灰底，王锋 - 介绍 - 2025-11.pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/灰底，王锋 - 介绍 - 2025-11.pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E7%81%B0%E5%BA%95%EF%BC%8C%E7%8E%8B%E9%94%8B%20-%20%E4%BB%8B%E7%BB%8D%20-%202025-11.pptx",
-          "extension": ".pptx",
-          "size": 181070,
-          "modifiedAt": "2026-03-09 15:55"
-        },
-        {
-          "name": "胡浩简介-肝胆外科.pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/胡浩简介-肝胆外科.pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E8%83%A1%E6%B5%A9%E7%AE%80%E4%BB%8B-%E8%82%9D%E8%83%86%E5%A4%96%E7%A7%91.pptx",
-          "extension": ".pptx",
-          "size": 627890,
-          "modifiedAt": "2026-03-06 09:09"
-        },
-        {
-          "name": "范向军.pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/范向军.pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E8%8C%83%E5%90%91%E5%86%9B.pptx",
-          "extension": ".pptx",
-          "size": 224512,
-          "modifiedAt": "2026-03-06 17:14"
-        },
-        {
-          "name": "鼓楼医院 程浩.pptx",
-          "category": "参考材料",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/鼓楼医院 程浩.pptx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E9%BC%93%E6%A5%BC%E5%8C%BB%E9%99%A2%20%E7%A8%8B%E6%B5%A9.pptx",
-          "extension": ".pptx",
-          "size": 8038749,
-          "modifiedAt": "2026-03-06 09:17"
-        },
-        {
-          "name": "20260314-金陵论见-日程A4 031401.jpg",
-          "category": "日程",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/日程/20260314-金陵论见-日程A4 031401.jpg",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E6%97%A5%E7%A8%8B/20260314-%E9%87%91%E9%99%B5%E8%AE%BA%E8%A7%81-%E6%97%A5%E7%A8%8BA4%20031401.jpg",
-          "extension": ".jpg",
-          "size": 809088,
-          "modifiedAt": "2026-03-09 15:37"
-        },
-        {
-          "name": "20260314-金陵论见-最新日程（更新）.jpg",
-          "category": "日程",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/日程/20260314-金陵论见-最新日程（更新）.jpg",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E6%97%A5%E7%A8%8B/20260314-%E9%87%91%E9%99%B5%E8%AE%BA%E8%A7%81-%E6%9C%80%E6%96%B0%E6%97%A5%E7%A8%8B%EF%BC%88%E6%9B%B4%E6%96%B0%EF%BC%89.jpg",
-          "extension": ".jpg",
-          "size": 806153,
-          "modifiedAt": "2026-03-09 15:28"
-        },
-        {
-          "name": "2026.03.14 东一区-胰腺癌会议信息表（总部）.xlsx",
-          "category": "根目录",
-          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/2026.03.14 东一区-胰腺癌会议信息表（总部）.xlsx",
-          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/2026.03.14%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E8%83%B0%E8%85%BA%E7%99%8C%E4%BC%9A%E8%AE%AE%E4%BF%A1%E6%81%AF%E8%A1%A8%EF%BC%88%E6%80%BB%E9%83%A8%EF%BC%89.xlsx",
-          "extension": ".xlsx",
-          "size": 43385,
-          "modifiedAt": "2026-03-27 15:54"
-        },
-        {
           "name": "1.MRD在肝胆胰肿瘤中的应用及进展-20260314.pptx",
-          "category": "课件",
+          "category": "会议课件",
           "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/课件/会议课件/1.MRD在肝胆胰肿瘤中的应用及进展-20260314.pptx",
           "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E8%AF%BE%E4%BB%B6/%E4%BC%9A%E8%AE%AE%E8%AF%BE%E4%BB%B6/1.MRD%E5%9C%A8%E8%82%9D%E8%83%86%E8%83%B0%E8%82%BF%E7%98%A4%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8%E5%8F%8A%E8%BF%9B%E5%B1%95-20260314.pptx",
           "extension": ".pptx",
@@ -226,7 +91,7 @@
         },
         {
           "name": "2.无创液体活检技术在肝胆胰肿瘤早筛中的应用进展_陆子鹏.pptx",
-          "category": "课件",
+          "category": "会议课件",
           "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/课件/会议课件/2.无创液体活检技术在肝胆胰肿瘤早筛中的应用进展_陆子鹏.pptx",
           "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E8%AF%BE%E4%BB%B6/%E4%BC%9A%E8%AE%AE%E8%AF%BE%E4%BB%B6/2.%E6%97%A0%E5%88%9B%E6%B6%B2%E4%BD%93%E6%B4%BB%E6%A3%80%E6%8A%80%E6%9C%AF%E5%9C%A8%E8%82%9D%E8%83%86%E8%83%B0%E8%82%BF%E7%98%A4%E6%97%A9%E7%AD%9B%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8%E8%BF%9B%E5%B1%95_%E9%99%86%E5%AD%90%E9%B9%8F.pptx",
           "extension": ".pptx",
@@ -235,7 +100,7 @@
         },
         {
           "name": "3. 肝胆胰肿瘤最新诊疗进展.pptx",
-          "category": "课件",
+          "category": "会议课件",
           "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/课件/会议课件/3. 肝胆胰肿瘤最新诊疗进展.pptx",
           "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E8%AF%BE%E4%BB%B6/%E4%BC%9A%E8%AE%AE%E8%AF%BE%E4%BB%B6/3.%20%E8%82%9D%E8%83%86%E8%83%B0%E8%82%BF%E7%98%A4%E6%9C%80%E6%96%B0%E8%AF%8A%E7%96%97%E8%BF%9B%E5%B1%95.pptx",
           "extension": ".pptx",
@@ -244,7 +109,7 @@
         },
         {
           "name": "串场PPT—3.14肺癌全程管理及MRD临床应用学术研讨会.pptx",
-          "category": "课件",
+          "category": "会议课件",
           "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/课件/串场PPT—3.14肺癌全程管理及MRD临床应用学术研讨会.pptx",
           "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E8%AF%BE%E4%BB%B6/%E4%B8%B2%E5%9C%BAPPT%E2%80%943.14%E8%82%BA%E7%99%8C%E5%85%A8%E7%A8%8B%E7%AE%A1%E7%90%86%E5%8F%8AMRD%E4%B8%B4%E5%BA%8A%E5%BA%94%E7%94%A8%E5%AD%A6%E6%9C%AF%E7%A0%94%E8%AE%A8%E4%BC%9A.pptx",
           "extension": ".pptx",
@@ -253,12 +118,111 @@
         },
         {
           "name": "会议致辞：不忘初心 方得始终-20260314.pptx",
-          "category": "课件",
+          "category": "会议课件",
           "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/课件/会议课件/会议致辞：不忘初心 方得始终-20260314.pptx",
           "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E8%AF%BE%E4%BB%B6/%E4%BC%9A%E8%AE%AE%E8%AF%BE%E4%BB%B6/%E4%BC%9A%E8%AE%AE%E8%87%B4%E8%BE%9E%EF%BC%9A%E4%B8%8D%E5%BF%98%E5%88%9D%E5%BF%83%20%E6%96%B9%E5%BE%97%E5%A7%8B%E7%BB%88-20260314.pptx",
           "extension": ".pptx",
           "size": 18019621,
           "modifiedAt": "2026-03-12 14:11"
+        },
+        {
+          "name": "1.蒋奎荣教授大会简历及照片.pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/1.蒋奎荣教授大会简历及照片.pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/1.%E8%92%8B%E5%A5%8E%E8%8D%A3%E6%95%99%E6%8E%88%E5%A4%A7%E4%BC%9A%E7%AE%80%E5%8E%86%E5%8F%8A%E7%85%A7%E7%89%87.pptx",
+          "extension": ".pptx",
+          "size": 5421409,
+          "modifiedAt": "2026-03-06 17:40"
+        },
+        {
+          "name": "2.刘付宝简介.pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/2.刘付宝简介.pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/2.%E5%88%98%E4%BB%98%E5%AE%9D%E7%AE%80%E4%BB%8B.pptx",
+          "extension": ".pptx",
+          "size": 7744724,
+          "modifiedAt": "2026-03-09 15:33"
+        },
+        {
+          "name": "3.陆子鹏简介_20260309(1).pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/3.陆子鹏简介_20260309(1).pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/3.%E9%99%86%E5%AD%90%E9%B9%8F%E7%AE%80%E4%BB%8B_20260309%281%29.pptx",
+          "extension": ".pptx",
+          "size": 8212823,
+          "modifiedAt": "2026-03-09 11:35"
+        },
+        {
+          "name": "4.杜娟 简介 2026.pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/4.杜娟 简介 2026.pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/4.%E6%9D%9C%E5%A8%9F%20%E7%AE%80%E4%BB%8B%202026.pptx",
+          "extension": ".pptx",
+          "size": 146049,
+          "modifiedAt": "2026-03-04 16:20"
+        },
+        {
+          "name": "5_2025-王新波简历.pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/5_2025-王新波简历.pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/5_2025-%E7%8E%8B%E6%96%B0%E6%B3%A2%E7%AE%80%E5%8E%86.pptx",
+          "extension": ".pptx",
+          "size": 2537138,
+          "modifiedAt": "2026-03-10 11:42"
+        },
+        {
+          "name": "串场PPT—3.14肺癌全程管理及MRD临床应用学术研讨会.pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/串场PPT—3.14肺癌全程管理及MRD临床应用学术研讨会.pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E4%B8%B2%E5%9C%BAPPT%E2%80%943.14%E8%82%BA%E7%99%8C%E5%85%A8%E7%A8%8B%E7%AE%A1%E7%90%86%E5%8F%8AMRD%E4%B8%B4%E5%BA%8A%E5%BA%94%E7%94%A8%E5%AD%A6%E6%9C%AF%E7%A0%94%E8%AE%A8%E4%BC%9A.pptx",
+          "extension": ".pptx",
+          "size": 40003022,
+          "modifiedAt": "2026-03-14 08:40"
+        },
+        {
+          "name": "李刚 专家简介.pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/李刚 专家简介.pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E6%9D%8E%E5%88%9A%20%E4%B8%93%E5%AE%B6%E7%AE%80%E4%BB%8B.pptx",
+          "extension": ".pptx",
+          "size": 1279994,
+          "modifiedAt": "2026-03-04 16:20"
+        },
+        {
+          "name": "灰底，王锋 - 介绍 - 2025-11.pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/灰底，王锋 - 介绍 - 2025-11.pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E7%81%B0%E5%BA%95%EF%BC%8C%E7%8E%8B%E9%94%8B%20-%20%E4%BB%8B%E7%BB%8D%20-%202025-11.pptx",
+          "extension": ".pptx",
+          "size": 181070,
+          "modifiedAt": "2026-03-09 15:55"
+        },
+        {
+          "name": "胡浩简介-肝胆外科.pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/胡浩简介-肝胆外科.pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E8%83%A1%E6%B5%A9%E7%AE%80%E4%BB%8B-%E8%82%9D%E8%83%86%E5%A4%96%E7%A7%91.pptx",
+          "extension": ".pptx",
+          "size": 627890,
+          "modifiedAt": "2026-03-06 09:09"
+        },
+        {
+          "name": "范向军.pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/范向军.pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E8%8C%83%E5%90%91%E5%86%9B.pptx",
+          "extension": ".pptx",
+          "size": 224512,
+          "modifiedAt": "2026-03-06 17:14"
+        },
+        {
+          "name": "鼓楼医院 程浩.pptx",
+          "category": "其他附件",
+          "relativePath": "20260314 东一区-总部参观项目（胰腺癌MRD）/参考材料/鼓楼医院 程浩.pptx",
+          "url": "/files/20260314%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E6%80%BB%E9%83%A8%E5%8F%82%E8%A7%82%E9%A1%B9%E7%9B%AE%EF%BC%88%E8%83%B0%E8%85%BA%E7%99%8CMRD%EF%BC%89/%E5%8F%82%E8%80%83%E6%9D%90%E6%96%99/%E9%BC%93%E6%A5%BC%E5%8C%BB%E9%99%A2%20%E7%A8%8B%E6%B5%A9.pptx",
+          "extension": ".pptx",
+          "size": 8038749,
+          "modifiedAt": "2026-03-06 09:17"
         }
       ],
       "localTables": [
@@ -491,17 +455,8 @@
       "folderMatched": true,
       "attachments": [
         {
-          "name": "日程.png",
-          "category": "根目录",
-          "relativePath": "20260320 总部-CMAC年会强生专场/日程.png",
-          "url": "/files/20260320%20%E6%80%BB%E9%83%A8-CMAC%E5%B9%B4%E4%BC%9A%E5%BC%BA%E7%94%9F%E4%B8%93%E5%9C%BA/%E6%97%A5%E7%A8%8B.png",
-          "extension": ".png",
-          "size": 172723,
-          "modifiedAt": "2026-07-14 11:08"
-        },
-        {
           "name": "从精准用药到动态干预 AI引擎打通肿瘤个体化诊疗全周期 汪笑男 20260319.pptx",
-          "category": "课件",
+          "category": "会议课件",
           "relativePath": "20260320 总部-CMAC年会强生专场/课件/从精准用药到动态干预 AI引擎打通肿瘤个体化诊疗全周期 汪笑男 20260319.pptx",
           "url": "/files/20260320%20%E6%80%BB%E9%83%A8-CMAC%E5%B9%B4%E4%BC%9A%E5%BC%BA%E7%94%9F%E4%B8%93%E5%9C%BA/%E8%AF%BE%E4%BB%B6/%E4%BB%8E%E7%B2%BE%E5%87%86%E7%94%A8%E8%8D%AF%E5%88%B0%E5%8A%A8%E6%80%81%E5%B9%B2%E9%A2%84%20AI%E5%BC%95%E6%93%8E%E6%89%93%E9%80%9A%E8%82%BF%E7%98%A4%E4%B8%AA%E4%BD%93%E5%8C%96%E8%AF%8A%E7%96%97%E5%85%A8%E5%91%A8%E6%9C%9F%20%E6%B1%AA%E7%AC%91%E7%94%B7%2020260319.pptx",
           "extension": ".pptx",
@@ -539,17 +494,8 @@
       "folderMatched": true,
       "attachments": [
         {
-          "name": "日程A4.jpg",
-          "category": "根目录",
-          "relativePath": "20260513 总部-DIA中国年会/日程A4.jpg",
-          "url": "/files/20260513%20%E6%80%BB%E9%83%A8-DIA%E4%B8%AD%E5%9B%BD%E5%B9%B4%E4%BC%9A/%E6%97%A5%E7%A8%8BA4.jpg",
-          "extension": ".jpg",
-          "size": 2920413,
-          "modifiedAt": "2026-05-09 09:43"
-        },
-        {
           "name": "1.20260515 Global Regulatory Strategies for GeneseeqPrime_v4.pptx",
-          "category": "课件及议题",
+          "category": "会议课件",
           "relativePath": "20260513 总部-DIA中国年会/课件及议题/1.20260515 Global Regulatory Strategies for GeneseeqPrime_v4.pptx",
           "url": "/files/20260513%20%E6%80%BB%E9%83%A8-DIA%E4%B8%AD%E5%9B%BD%E5%B9%B4%E4%BC%9A/%E8%AF%BE%E4%BB%B6%E5%8F%8A%E8%AE%AE%E9%A2%98/1.20260515%20Global%20Regulatory%20Strategies%20for%20GeneseeqPrime_v4.pptx",
           "extension": ".pptx",
@@ -558,7 +504,7 @@
         },
         {
           "name": "2. Final_Pharma considerations on China CDx_Charlie.pptx",
-          "category": "课件及议题",
+          "category": "会议课件",
           "relativePath": "20260513 总部-DIA中国年会/课件及议题/2. Final_Pharma considerations on China CDx_Charlie.pptx",
           "url": "/files/20260513%20%E6%80%BB%E9%83%A8-DIA%E4%B8%AD%E5%9B%BD%E5%B9%B4%E4%BC%9A/%E8%AF%BE%E4%BB%B6%E5%8F%8A%E8%AE%AE%E9%A2%98/2.%20Final_Pharma%20considerations%20on%20China%20CDx_Charlie.pptx",
           "extension": ".pptx",
@@ -614,15 +560,6 @@
           "modifiedAt": "2026-03-25 16:35"
         },
         {
-          "name": "KV.png",
-          "category": "会议课件",
-          "relativePath": "20260328 东二区-乳腺癌精准诊疗会议/会议课件/KV.png",
-          "url": "/files/20260328%20%E4%B8%9C%E4%BA%8C%E5%8C%BA-%E4%B9%B3%E8%85%BA%E7%99%8C%E7%B2%BE%E5%87%86%E8%AF%8A%E7%96%97%E4%BC%9A%E8%AE%AE/%E4%BC%9A%E8%AE%AE%E8%AF%BE%E4%BB%B6/KV.png",
-          "extension": ".png",
-          "size": 4144369,
-          "modifiedAt": "2026-03-27 14:46"
-        },
-        {
           "name": "串场PPT— 20260328金陵论见-乳腺癌精准诊疗学术交流会.pdf",
           "category": "会议课件",
           "relativePath": "20260328 东二区-乳腺癌精准诊疗会议/会议课件/串场PPT— 20260328金陵论见-乳腺癌精准诊疗学术交流会.pdf",
@@ -666,24 +603,6 @@
           "extension": ".pptx",
           "size": 17875098,
           "modifiedAt": "2026-03-26 11:03"
-        },
-        {
-          "name": "2026.03.28 东一区-乳腺癌会议信息表.xlsx",
-          "category": "根目录",
-          "relativePath": "20260328 东二区-乳腺癌精准诊疗会议/2026.03.28 东一区-乳腺癌会议信息表.xlsx",
-          "url": "/files/20260328%20%E4%B8%9C%E4%BA%8C%E5%8C%BA-%E4%B9%B3%E8%85%BA%E7%99%8C%E7%B2%BE%E5%87%86%E8%AF%8A%E7%96%97%E4%BC%9A%E8%AE%AE/2026.03.28%20%E4%B8%9C%E4%B8%80%E5%8C%BA-%E4%B9%B3%E8%85%BA%E7%99%8C%E4%BC%9A%E8%AE%AE%E4%BF%A1%E6%81%AF%E8%A1%A8.xlsx",
-          "extension": ".xlsx",
-          "size": 34185,
-          "modifiedAt": "2026-03-27 15:54"
-        },
-        {
-          "name": "20260328-金陵论见-乳腺癌.jpg",
-          "category": "根目录",
-          "relativePath": "20260328 东二区-乳腺癌精准诊疗会议/20260328-金陵论见-乳腺癌.jpg",
-          "url": "/files/20260328%20%E4%B8%9C%E4%BA%8C%E5%8C%BA-%E4%B9%B3%E8%85%BA%E7%99%8C%E7%B2%BE%E5%87%86%E8%AF%8A%E7%96%97%E4%BC%9A%E8%AE%AE/20260328-%E9%87%91%E9%99%B5%E8%AE%BA%E8%A7%81-%E4%B9%B3%E8%85%BA%E7%99%8C.jpg",
-          "extension": ".jpg",
-          "size": 654997,
-          "modifiedAt": "2026-03-18 17:40"
         }
       ],
       "localTables": [
@@ -1024,15 +943,6 @@
       "folderMatched": true,
       "attachments": [
         {
-          "name": "会议资助协议-2026 CTONG年会（世和）.doc",
-          "category": "会议合同",
-          "relativePath": "20260801 总部-CTONG年会/会议合同/会议资助协议-2026 CTONG年会（世和）.doc",
-          "url": "/files/20260801%20%E6%80%BB%E9%83%A8-CTONG%E5%B9%B4%E4%BC%9A/%E4%BC%9A%E8%AE%AE%E5%90%88%E5%90%8C/%E4%BC%9A%E8%AE%AE%E8%B5%84%E5%8A%A9%E5%8D%8F%E8%AE%AE-2026%20CTONG%E5%B9%B4%E4%BC%9A%EF%BC%88%E4%B8%96%E5%92%8C%EF%BC%89.doc",
-          "extension": ".doc",
-          "size": 329728,
-          "modifiedAt": "2026-07-10 15:14"
-        },
-        {
           "name": "2026CTONG年会 讲者PPT模板(1).pptx",
           "category": "会议课件",
           "relativePath": "20260801 总部-CTONG年会/会议课件/2026CTONG年会 讲者PPT模板(1).pptx",
@@ -1042,26 +952,8 @@
           "modifiedAt": "2026-06-30 09:43"
         },
         {
-          "name": "【学术会议】2026.08.01 CTONG年会会议信息表.xlsx",
-          "category": "根目录",
-          "relativePath": "20260801 总部-CTONG年会/【学术会议】2026.08.01 CTONG年会会议信息表.xlsx",
-          "url": "/files/20260801%20%E6%80%BB%E9%83%A8-CTONG%E5%B9%B4%E4%BC%9A/%E3%80%90%E5%AD%A6%E6%9C%AF%E4%BC%9A%E8%AE%AE%E3%80%912026.08.01%20CTONG%E5%B9%B4%E4%BC%9A%E4%BC%9A%E8%AE%AE%E4%BF%A1%E6%81%AF%E8%A1%A8.xlsx",
-          "extension": ".xlsx",
-          "size": 293754,
-          "modifiedAt": "2026-07-07 14:50"
-        },
-        {
-          "name": "会议信息表：CTONG 参会日程（广州） 2025.xlsx",
-          "category": "根目录",
-          "relativePath": "20260801 总部-CTONG年会/会议信息表：CTONG 参会日程（广州） 2025.xlsx",
-          "url": "/files/20260801%20%E6%80%BB%E9%83%A8-CTONG%E5%B9%B4%E4%BC%9A/%E4%BC%9A%E8%AE%AE%E4%BF%A1%E6%81%AF%E8%A1%A8%EF%BC%9ACTONG%20%E5%8F%82%E4%BC%9A%E6%97%A5%E7%A8%8B%EF%BC%88%E5%B9%BF%E5%B7%9E%EF%BC%89%202025.xlsx",
-          "extension": ".xlsx",
-          "size": 537177,
-          "modifiedAt": "2026-05-12 17:53"
-        },
-        {
           "name": "参会资讯（2026 CTONG年会）.pdf",
-          "category": "根目录",
+          "category": "其他附件",
           "relativePath": "20260801 总部-CTONG年会/参会资讯（2026 CTONG年会）.pdf",
           "url": "/files/20260801%20%E6%80%BB%E9%83%A8-CTONG%E5%B9%B4%E4%BC%9A/%E5%8F%82%E4%BC%9A%E8%B5%84%E8%AE%AF%EF%BC%882026%20CTONG%E5%B9%B4%E4%BC%9A%EF%BC%89.pdf",
           "extension": ".pdf",
@@ -1070,7 +962,7 @@
         },
         {
           "name": "第16届中国肿瘤学临床试验发展论坛 -日程概览版.pdf",
-          "category": "根目录",
+          "category": "其他附件",
           "relativePath": "20260801 总部-CTONG年会/第16届中国肿瘤学临床试验发展论坛 -日程概览版.pdf",
           "url": "/files/20260801%20%E6%80%BB%E9%83%A8-CTONG%E5%B9%B4%E4%BC%9A/%E7%AC%AC16%E5%B1%8A%E4%B8%AD%E5%9B%BD%E8%82%BF%E7%98%A4%E5%AD%A6%E4%B8%B4%E5%BA%8A%E8%AF%95%E9%AA%8C%E5%8F%91%E5%B1%95%E8%AE%BA%E5%9D%9B%20-%E6%97%A5%E7%A8%8B%E6%A6%82%E8%A7%88%E7%89%88.pdf",
           "extension": ".pdf",
@@ -1079,7 +971,7 @@
         },
         {
           "name": "精准医疗-药物研发.pdf",
-          "category": "根目录",
+          "category": "其他附件",
           "relativePath": "20260801 总部-CTONG年会/精准医疗-药物研发.pdf",
           "url": "/files/20260801%20%E6%80%BB%E9%83%A8-CTONG%E5%B9%B4%E4%BC%9A/%E7%B2%BE%E5%87%86%E5%8C%BB%E7%96%97-%E8%8D%AF%E7%89%A9%E7%A0%94%E5%8F%91.pdf",
           "extension": ".pdf",
@@ -1271,17 +1163,8 @@
       "folderMatched": true,
       "attachments": [
         {
-          "name": "03-日程.jpg",
-          "category": "日程",
-          "relativePath": "20260715 总部-医学信息专员培训/日程/03-日程.jpg",
-          "url": "/files/20260715%20%E6%80%BB%E9%83%A8-%E5%8C%BB%E5%AD%A6%E4%BF%A1%E6%81%AF%E4%B8%93%E5%91%98%E5%9F%B9%E8%AE%AD/%E6%97%A5%E7%A8%8B/03-%E6%97%A5%E7%A8%8B.jpg",
-          "extension": ".jpg",
-          "size": 1677791,
-          "modifiedAt": "2026-03-26 10:55"
-        },
-        {
           "name": "01-PPT模板.pptx",
-          "category": "课件",
+          "category": "会议课件",
           "relativePath": "20260715 总部-医学信息专员培训/课件/01-PPT模板.pptx",
           "url": "/files/20260715%20%E6%80%BB%E9%83%A8-%E5%8C%BB%E5%AD%A6%E4%BF%A1%E6%81%AF%E4%B8%93%E5%91%98%E5%9F%B9%E8%AE%AD/%E8%AF%BE%E4%BB%B6/01-PPT%E6%A8%A1%E6%9D%BF.pptx",
           "extension": ".pptx",

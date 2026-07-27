@@ -1,6 +1,7 @@
 const state = {
   events: [],
   dataVersion: null,
+  cloudFiles: {},
   currentDate: new Date(),
   viewMode: "month",
   filters: {
@@ -70,6 +71,10 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function isCloudSnapshot() {
+  return window.location.hostname.endsWith("github.io") || !window.location.pathname.startsWith("/");
 }
 
 function uniqueValues(key) {
@@ -360,6 +365,116 @@ function renderFileSections(files) {
   `;
 }
 
+function renderCloudFileList(eventId) {
+  const cache = state.cloudFiles[eventId];
+  if (!cache) {
+    return `<div class="info-box cloud-file-list" id="cloudFiles"><p>正在读取云端文件...</p></div>`;
+  }
+  if (cache.error) {
+    return `<div class="info-box cloud-file-list" id="cloudFiles"><p>${escapeHtml(cache.error)}</p></div>`;
+  }
+  if (!cache.configured) {
+    return `<div class="info-box cloud-file-list" id="cloudFiles"><p>尚未配置 Supabase Storage，配置后可上传和下载课件/附件。</p></div>`;
+  }
+  if (!cache.files.length) {
+    return `<div class="info-box cloud-file-list" id="cloudFiles"><p>云端暂无文件。</p></div>`;
+  }
+  return `
+    <div class="file-section cloud-file-list" id="cloudFiles">
+      <div class="file-group">
+        <h4>云端课件/附件</h4>
+        ${cache.files
+          .map(
+            (file) => `
+              <a class="file-link" href="${file.url}" target="_blank" rel="noreferrer">
+                <span>${escapeHtml(file.name)}</span>
+                <span>${escapeHtml(file.modifiedAt || "可下载")}</span>
+              </a>
+            `,
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderCloudUpload(eventId) {
+  if (isCloudSnapshot()) {
+    return "";
+  }
+  return `
+    <h3 class="section-title">上传课件/附件</h3>
+    <div class="upload-box">
+      <div class="upload-row">
+        <input id="cloudUploadInput" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+        <button class="primary-button" id="cloudUploadButton" type="button">上传</button>
+      </div>
+      <p class="upload-hint" id="cloudUploadStatus">支持 PDF、Word、PPT，单个文件不超过 50MB。</p>
+    </div>
+    <h3 class="section-title">云端文件</h3>
+    ${renderCloudFileList(eventId)}
+  `;
+}
+
+async function loadCloudFiles(eventId) {
+  if (isCloudSnapshot()) return;
+  try {
+    const response = await fetch(`/api/cloud-files?eventId=${encodeURIComponent(eventId)}&ts=${Date.now()}`);
+    const payload = await response.json();
+    state.cloudFiles[eventId] = {
+      configured: Boolean(payload.configured),
+      files: payload.files || [],
+      error: payload.error || "",
+    };
+  } catch (error) {
+    state.cloudFiles[eventId] = { configured: false, files: [], error: `云端文件读取失败：${error.message}` };
+  }
+  const container = document.querySelector("#cloudFiles");
+  if (container) {
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = renderCloudFileList(eventId).trim();
+    container.replaceWith(wrapper.firstElementChild);
+  }
+}
+
+function bindUploadControls(eventId) {
+  const input = document.querySelector("#cloudUploadInput");
+  const button = document.querySelector("#cloudUploadButton");
+  const status = document.querySelector("#cloudUploadStatus");
+  if (!input || !button || !status) return;
+  button.addEventListener("click", async () => {
+    const file = input.files && input.files[0];
+    if (!file) {
+      status.textContent = "请先选择一个 PDF、Word 或 PPT 文件。";
+      return;
+    }
+    const extension = file.name.split(".").pop().toLowerCase();
+    if (!["pdf", "doc", "docx", "ppt", "pptx"].includes(extension)) {
+      status.textContent = "文件格式不支持，请选择 PDF、Word 或 PPT。";
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    button.disabled = true;
+    status.textContent = "正在上传...";
+    try {
+      const response = await fetch(`/api/upload?eventId=${encodeURIComponent(eventId)}`, {
+        method: "POST",
+        body: formData,
+      });
+      const payload = await response.json();
+      if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
+      status.textContent = "上传完成，云端文件列表已更新。";
+      input.value = "";
+      await loadCloudFiles(eventId);
+    } catch (error) {
+      status.textContent = `上传失败：${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
 function renderLocalTables(tables) {
   if (!tables.length) return "";
   return `
@@ -418,10 +533,12 @@ function openDetail(eventId) {
     </div>
     <h3 class="section-title">相关文件</h3>
     ${renderFileSections(event.attachments)}
-    ${renderLocalTables(event.localTables || [])}
+    ${renderCloudUpload(event.id)}
   `;
   els.detailDrawer.classList.add("open");
   els.detailDrawer.setAttribute("aria-hidden", "false");
+  bindUploadControls(event.id);
+  loadCloudFiles(event.id);
 }
 
 function closeDetail() {
