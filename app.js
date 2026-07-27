@@ -3,6 +3,7 @@ const state = {
   dataVersion: null,
   cloudFiles: {},
   activeDetailEventId: "",
+  adminDeleteToken: sessionStorage.getItem("meetingAdminDeleteToken") || "",
   cloudRefreshTimer: null,
   currentDate: new Date(),
   viewMode: "month",
@@ -537,6 +538,7 @@ function renderCloudFileList(eventId) {
                 <a class="file-name" href="${file.url}" target="_blank" rel="noreferrer">${escapeHtml(file.name)}</a>
                 <span>${escapeHtml(file.modifiedAt || "可下载")}</span>
                 <a class="file-action" href="${file.url}" download>下载</a>
+                ${isCloudSnapshot() ? "" : `<button class="file-action danger-link" type="button" data-delete-path="${escapeHtml(file.path)}">删除</button>`}
               </div>
             `,
           )
@@ -572,6 +574,7 @@ async function loadCloudFiles(eventId) {
     const wrapper = document.createElement("div");
     wrapper.innerHTML = renderCloudFileList(eventId).trim();
     container.replaceWith(wrapper.firstElementChild);
+    bindCloudFileDeleteControls(eventId);
   }
 }
 
@@ -616,6 +619,47 @@ function bindUploadControls(eventId) {
     } finally {
       button.disabled = false;
     }
+  });
+}
+
+async function deleteCloudFile(eventId, path) {
+  let token = state.adminDeleteToken;
+  if (!token) {
+    token = window.prompt("请输入管理员删除口令");
+    if (!token) return;
+  }
+  const response = await fetch(`/api/cloud-file?path=${encodeURIComponent(path)}`, {
+    method: "DELETE",
+    headers: { "X-Admin-Token": token },
+  });
+  const payload = await readApiResponse(response);
+  if (!response.ok || payload.error) {
+    if (response.status === 403) {
+      state.adminDeleteToken = "";
+      sessionStorage.removeItem("meetingAdminDeleteToken");
+    }
+    throw new Error(payload.error || `HTTP ${response.status}`);
+  }
+  state.adminDeleteToken = token;
+  sessionStorage.setItem("meetingAdminDeleteToken", token);
+  await loadCloudFiles(eventId);
+  await loadEvents({ silent: true });
+}
+
+function bindCloudFileDeleteControls(eventId) {
+  document.querySelectorAll("[data-delete-path]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const path = button.getAttribute("data-delete-path");
+      if (!path || !window.confirm("确认删除这个云端文件吗？删除后无法从页面恢复。")) return;
+      button.disabled = true;
+      try {
+        await deleteCloudFile(eventId, path);
+      } catch (error) {
+        window.alert(`删除失败：${error.message}`);
+      } finally {
+        button.disabled = false;
+      }
+    });
   });
 }
 
@@ -800,6 +844,7 @@ function openDetail(eventId) {
   els.detailDrawer.setAttribute("aria-hidden", "false");
   document.querySelector("#deleteEventButton")?.addEventListener("click", () => deleteEvent(event.id));
   bindUploadControls(event.id);
+  bindCloudFileDeleteControls(event.id);
   startCloudFileSync(event.id);
 }
 

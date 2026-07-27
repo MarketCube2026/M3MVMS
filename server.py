@@ -53,6 +53,7 @@ SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "meeting-files")
 SUPABASE_MASTER_EXCEL_PATH = os.environ.get("SUPABASE_MASTER_EXCEL_PATH", "data/汇总表-市场部市场活动计划汇总.xlsx")
 MEETING_DATA_SOURCE = os.environ.get("MEETING_DATA_SOURCE", "auto").lower()
+ADMIN_DELETE_TOKEN = os.environ.get("ADMIN_DELETE_TOKEN", "")
 
 MASTER_HEADERS = [
     "序号",
@@ -375,6 +376,13 @@ def storage_object_url(path: str) -> str:
     return f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}/{quote(path, safe='/')}"
 
 
+def normalize_storage_path(value: str) -> str:
+    path = posixpath.normpath(unquote(value or "")).lstrip("/")
+    if not path or path.startswith("../") or "/../" in path:
+        raise RuntimeError("文件路径无效")
+    return path
+
+
 def get_storage_object(path: str) -> bytes:
     _, _, body = storage_request("GET", storage_object_url(path), None, storage_headers("application/octet-stream"))
     return body
@@ -384,6 +392,19 @@ def put_storage_object(path: str, data: bytes, content_type: str) -> None:
     headers = storage_headers(content_type)
     headers["x-upsert"] = "true"
     storage_request("POST", storage_object_url(path), data, headers)
+
+
+def delete_storage_objects(paths: list[str]) -> None:
+    if not supabase_configured():
+        raise RuntimeError("未配置 Supabase Storage")
+    if not SUPABASE_SERVICE_ROLE_KEY:
+        raise RuntimeError("删除文件需要配置 SUPABASE_SERVICE_ROLE_KEY")
+    prefixes = [normalize_storage_path(path) for path in paths if clean_value(path)]
+    if not prefixes:
+        raise RuntimeError("请选择要删除的文件")
+    url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET}"
+    body = json.dumps({"prefixes": prefixes}).encode("utf-8")
+    storage_request("DELETE", url, body, storage_headers("application/json"))
 
 
 def use_supabase_master() -> bool:
@@ -864,6 +885,16 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
         data = self.rfile.read(length)
         return json.loads(data.decode("utf-8") or "{}")
 
+    def require_admin_delete(self) -> bool:
+        if not ADMIN_DELETE_TOKEN:
+            self.send_json({"error": "未配置管理员删除口令，请设置 ADMIN_DELETE_TOKEN"}, HTTPStatus.SERVICE_UNAVAILABLE)
+            return False
+        token = self.headers.get("X-Admin-Token", "")
+        if token != ADMIN_DELETE_TOKEN:
+            self.send_json({"error": "管理员口令错误或缺失"}, HTTPStatus.FORBIDDEN)
+            return False
+        return True
+
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/api/events":
@@ -919,6 +950,10 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
             event_id = parse_qs(parsed.query).get("eventId", [""])[0]
             self.handle_delete_event(event_id)
             return
+        if parsed.path == "/api/cloud-file":
+            path = parse_qs(parsed.query).get("path", [""])[0]
+            self.handle_delete_cloud_file(path)
+            return
         self.send_error(HTTPStatus.NOT_FOUND, "接口不存在")
 
     def serve_events(self) -> None:
@@ -958,8 +993,9 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
         if not supabase_configured():
             self.send_error(HTTPStatus.SERVICE_UNAVAILABLE, "未配置 Supabase Storage")
             return
-        path = posixpath.normpath(unquote(path)).lstrip("/")
-        if not path or path.startswith("../") or "/../" in path:
+        try:
+            path = normalize_storage_path(path)
+        except Exception:
             self.send_error(HTTPStatus.FORBIDDEN, "文件路径无效")
             return
         try:
@@ -1023,6 +1059,15 @@ class MeetingDashboardHandler(SimpleHTTPRequestHandler):
             self.send_json({"ok": True, "upload": signed})
         except Exception as exc:
             self.send_json({"error": str(exc)}, HTTPStatus.BAD_GATEWAY)
+
+    def handle_delete_cloud_file(self, path: str) -> None:
+        if not self.require_admin_delete():
+            return
+        try:
+            delete_storage_objects([path])
+            self.send_json({"ok": True})
+        except Exception as exc:
+            self.send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
 
     def handle_import_file(self, event_id: str) -> None:
         if not event_id:

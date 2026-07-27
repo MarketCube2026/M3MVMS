@@ -770,7 +770,7 @@ input:focus {
 
 .file-link {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
   gap: 12px;
   align-items: center;
   padding: 10px 12px;
@@ -804,6 +804,16 @@ input:focus {
   text-decoration: none;
   font-size: 13px;
   font-weight: 700;
+}
+
+button.file-action {
+  cursor: pointer;
+}
+
+.danger-link {
+  border-color: #f1b8b8;
+  background: #fff5f5;
+  color: #b42318;
 }
 
 .upload-box {
